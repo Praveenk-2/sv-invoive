@@ -41,7 +41,7 @@ export default function LoginPage() {
                 await new Promise(resolve => setTimeout(resolve, 100));
 
                 console.log('🔀 Redirecting to dashboard...');
-                window.location.href = '/dashboard/master';  // ← Changed from '/dashboard/master'
+                window.location.href = '/dashboard';  // ← Changed from '/dashboard/master'
 
             } else {
                 console.error('❌ Login failed:', response);
@@ -81,7 +81,7 @@ export default function LoginPage() {
                             </div>
                         )}
 
-                        <div className="mb-2">
+                        <div className="mb-6">
                             <div className='mb-4 flex items-center gap-2 bg-[#eff3f6] px-[15px] py-[10px] rounded-[10px]'>
                                 <label htmlFor="email" className="">
                                     <MdEmail className='' />
@@ -135,7 +135,7 @@ export default function LoginPage() {
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-between mb-4">
+                        {/* <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center">
                                 <input
                                     id="remember-me"
@@ -153,7 +153,7 @@ export default function LoginPage() {
                                     Forgot your password?
                                 </Link>
                             </div>
-                        </div>
+                        </div> */}
 
                         <div>
                             <button
@@ -171,7 +171,7 @@ export default function LoginPage() {
                                     fontWeight: 'bold'
                                 }}
                             >
-                                {loading ? '⏳ Logging in...' : '🔐 Login'}
+                                {loading ? '⏳ Logging in...' : 'Login'}
                             </button>
                         </div>
 

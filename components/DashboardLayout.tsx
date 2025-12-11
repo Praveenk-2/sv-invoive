@@ -13,20 +13,56 @@ import {
   Menu,
   X,
 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  // const { user, logout } = useAuth();
 
-  const handleLogout = async () => {
-    // await logout();
-    router.push('/login');
-  };
+
+  const { logout } = useAuth();
+
+
+  // const handleLogout = async () => {
+  //   // await logout();
+  //   router.push('/login');
+  // };
 
   // Simple menu items - direct links, no submenus
   const menuItems = [
+    {
+      name: 'Roles',
+      href: '/dashboard/roles',
+      icon: Settings,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      hoverBg: 'hover:bg-blue-100',
+    },
+    {
+      name: 'Users',
+      href: '/dashboard/users',
+      icon: Settings,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      hoverBg: 'hover:bg-blue-100',
+    },
+    {
+      name: 'User Roles',
+      href: '/dashboard/user-roles',
+      icon: Settings,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      hoverBg: 'hover:bg-blue-100',
+    },
+    {
+      name: 'Items',
+      href: '/dashboard/items',
+      icon: Settings,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      hoverBg: 'hover:bg-blue-100',
+    },
     {
       name: 'Master',
       href: '/dashboard/master',
@@ -67,9 +103,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Simple Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 shadow-lg text-white bg-[#448aff] transform transition-transform duration-200 lg:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 shadow-lg text-white bg-[#448aff] transform transition-transform duration-200 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
@@ -103,11 +138,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 key={item.name}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center px-4 py-3 rounded-lg transition-all hover:text-blue-400 ${
-                  isActive(item.href)
+                className={`flex items-center px-4 py-3 rounded-lg transition-all hover:text-blue-400 ${isActive(item.href)
                     ? `${item.bgColor} ${item.color} font-medium shadow-sm`
                     : `text-white ${item.hoverBg}`
-                }`}
+                  }`}
               >
                 <item.icon className="h-5 w-5 mr-3" />
                 <span className="font-medium">{item.name}</span>
@@ -119,13 +153,35 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Logout Button */}
         <div className="border-t border-gray-200 p-4">
           <button
-            onClick={handleLogout}
+            onClick={async () => {
+              try {
+                await logout();
+
+                localStorage.clear();
+                document.cookie.split(";").forEach((c) => {
+                  document.cookie = c
+                    .replace(/^ +/, "")
+                    .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                });
+
+                // Redirect to login
+                router.push('/login');
+              } catch (error) {
+                console.error('Logout failed:', error);
+                // Even if error, force redirect
+                localStorage.clear();
+                router.push('/login');
+              } finally {
+                // Ensure sidebar closes on mobile
+                setSidebarOpen(false);
+              }
+            }}
             className="w-full flex items-center px-4 py-3 text-red-500 hover:bg-red-50 rounded-lg transition-all font-medium"
           >
             <LogOut className="h-5 w-5 mr-3" />
             Logout
           </button>
-        </div> 
+        </div>
       </aside>
 
       {/* Main Content */}
@@ -141,17 +197,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <Menu className="h-6 w-6" />
               </button>
               <h2 className="text-lg font-semibold text-gray-900">
-                {pathname === '/dashboard' 
-                  ? 'Dashboard' 
+                {pathname === '/dashboard'
+                  ? 'Dashboard'
                   : pathname.split('/')[2]?.charAt(0).toUpperCase() + pathname.split('/')[2]?.slice(1) || 'Page'}
               </h2>
             </div>
 
             <div className="text-sm text-gray-600">
-              {new Date().toLocaleDateString('en-US', { 
-                weekday: 'short', 
-                month: 'short', 
-                day: 'numeric' 
+              {new Date().toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric'
               })}
             </div>
           </div>
