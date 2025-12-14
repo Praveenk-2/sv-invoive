@@ -1,41 +1,41 @@
-// Complete Users management page with modal popup form
+// Complete Suppliers management page with modal popup form
 'use client';
 
 import React, { useState } from 'react';
-import UserList from '@/components/UserList';
-import UserForm from '@/components/UserForm';
-import { User } from '@/types/user.types';
 import DashboardLayout from '@/components/DashboardLayout';
+import SupplierList from '@/components/SupplierList';
+import SupplierForm from '@/components/SupplierForm';
+import { Supplier } from '@/types/supplier.types';
 
-export default function UsersPage() {
+export default function SuppliersPage() {
   const [showForm, setShowForm] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const handleEdit = (user: User) => {
-    setEditingUser(user);
+  const handleEdit = (supplier: Supplier) => {
+    setEditingSupplier(supplier);
     setShowForm(true);
   };
 
   const handleSuccess = () => {
     setShowForm(false);
-    setEditingUser(null);
+    setEditingSupplier(null);
     setRefreshKey(prev => prev + 1);
   };
 
   const handleCancel = () => {
     setShowForm(false);
-    setEditingUser(null);
+    setEditingSupplier(null);
   };
 
   const handleCreateNew = () => {
-    setEditingUser(null);
+    setEditingSupplier(null);
     setShowForm(true);
   };
 
   return (
     <DashboardLayout>
-      <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ padding: '20px', maxWidth: '1600px', margin: '0 auto' }}>
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
@@ -44,7 +44,12 @@ export default function UsersPage() {
           paddingBottom: '20px',
           borderBottom: '2px solid #1976d2'
         }}>
-          <h1 style={{ margin: 0, color: '#1976d2' }}>User Management</h1>
+          <div>
+            <h1 style={{ margin: 0, color: '#1976d2' }}>Supplier Management</h1>
+            <p style={{ margin: '5px 0 0 0', color: '#666' }}>
+              Manage your suppliers, contacts, and GST information
+            </p>
+          </div>
           <button
             onClick={handleCreateNew}
             style={{
@@ -58,11 +63,11 @@ export default function UsersPage() {
               fontWeight: 'bold',
             }}
           >
-            + Create New User
+            + Add New Supplier
           </button>
         </div>
 
-        <UserList key={refreshKey} onEdit={handleEdit} />
+        <SupplierList key={refreshKey} onEdit={handleEdit} />
       </div>
 
       {/* Modal Overlay */}
@@ -89,7 +94,7 @@ export default function UsersPage() {
               backgroundColor: 'white',
               borderRadius: '8px',
               boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.15)',
-              maxWidth: '600px',
+              maxWidth: '700px',
               width: '100%',
               maxHeight: '90vh',
               overflow: 'auto',
@@ -110,7 +115,7 @@ export default function UsersPage() {
               zIndex: 1,
             }}>
               <h2 style={{ margin: 0, color: '#1976d2' }}>
-                {editingUser ? 'Edit User' : 'Create New User'}
+                {editingSupplier ? 'Edit Supplier' : 'Add New Supplier'}
               </h2>
               <button
                 onClick={handleCancel}
@@ -137,8 +142,8 @@ export default function UsersPage() {
 
             {/* Modal Body */}
             <div style={{ padding: '20px' }}>
-              <UserForm 
-                userToEdit={editingUser}
+              <SupplierForm 
+                supplierToEdit={editingSupplier}
                 onSuccess={handleSuccess}
                 onCancel={handleCancel}
               />

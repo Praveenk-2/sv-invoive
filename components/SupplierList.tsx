@@ -1,61 +1,47 @@
-// Component to display list of items
+// Component to display list of suppliers
 'use client';
 
 import React, { useState } from 'react';
-import { useItems } from '@/hooks/useItems';
-import { itemService } from '@/services/itemService';
-import { Item } from '@/types/item.types';
+import { useSuppliers } from '@/hooks/useSuppliers';
+import { supplierService } from '@/services/supplierService';
+import { Supplier } from '@/types/supplier.types';
 
-interface ItemListProps {
-  onEdit?: (item: Item) => void;
+interface SupplierListProps {
+  onEdit?: (supplier: Supplier) => void;
 }
 
-export default function ItemList({ onEdit }: ItemListProps) {
-  const { items, loading, error, refetch } = useItems();
+export default function SupplierList({ onEdit }: SupplierListProps) {
+  const { suppliers, loading, error, refetch } = useSuppliers();
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleDelete = async (id: number) => {
-    console.log('Deleting item with ID:', id);
+    console.log('Deleting supplier with ID:', id);
     
-    if (!confirm('Are you sure you want to delete this item?')) return;
+    if (!confirm('Are you sure you want to delete this supplier?')) return;
 
     try {
-      await itemService.deleteItem(id);
-      alert('Item deleted successfully!');
+      await supplierService.deleteSupplier(id);
+      alert('Supplier deleted successfully!');
       refetch();
     } catch (err: any) {
-      console.error('Error deleting item:', err);
-      const errorMsg = err?.response?.data?.message || err.message || 'Failed to delete item';
+      console.error('Error deleting supplier:', err);
+      const errorMsg = err?.response?.data?.message || err.message || 'Failed to delete supplier';
       alert(errorMsg);
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(price);
-  };
-
-  // Filter items based on search
-  const filteredItems = items.filter(item =>
-    item.ItemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.SKU.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.Barcode.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filter suppliers based on search
+  const filteredSuppliers = suppliers.filter(supplier =>
+    supplier.SupplierName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    supplier.Email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    supplier.Contact.includes(searchTerm) ||
+    supplier.GSTNumber.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
     return (
       <div style={{ padding: '20px', textAlign: 'center' }}>
-        Loading items...
+        Loading suppliers...
       </div>
     );
   }
@@ -82,11 +68,11 @@ export default function ItemList({ onEdit }: ItemListProps) {
         alignItems: 'center',
         marginBottom: '20px'
       }}>
-        <h2>All Items ({filteredItems.length})</h2>
+        <h2>All Suppliers ({filteredSuppliers.length})</h2>
         
         <input
           type="text"
-          placeholder="Search by name, SKU, or barcode..."
+          placeholder="Search by name, email, contact, or GST..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{
@@ -94,14 +80,14 @@ export default function ItemList({ onEdit }: ItemListProps) {
             fontSize: '14px',
             border: '1px solid #ccc',
             borderRadius: '4px',
-            width: '300px',
+            width: '350px',
           }}
         />
       </div>
       
-      {filteredItems.length === 0 ? (
+      {filteredSuppliers.length === 0 ? (
         <p style={{ color: '#666', fontStyle: 'italic' }}>
-          {searchTerm ? 'No items found matching your search.' : 'No items found. Create your first item!'}
+          {searchTerm ? 'No suppliers found matching your search.' : 'No suppliers found. Add your first supplier!'}
         </p>
       ) : (
         <div className='scroll-bar'  style={{ overflowX: 'auto' }}>
@@ -110,60 +96,76 @@ export default function ItemList({ onEdit }: ItemListProps) {
             borderCollapse: 'collapse', 
             marginTop: '20px',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            minWidth: '1200px'
+            minWidth: '1100px'
           }}>
             <thead>
               <tr style={{ backgroundColor: '#1976d2', color: 'white' }}>
                 <th style={tableHeaderStyle}>ID</th>
-                <th style={tableHeaderStyle}>Item Name</th>
-                <th style={tableHeaderStyle}>SKU</th>
-                <th style={tableHeaderStyle}>Barcode</th>
-                <th style={tableHeaderStyle}>Unit Price</th>
-                <th style={tableHeaderStyle}>Reorder Level</th>
+                <th style={tableHeaderStyle}>Supplier Name</th>
+                <th style={tableHeaderStyle}>Contact</th>
+                <th style={tableHeaderStyle}>Email</th>
+                <th style={tableHeaderStyle}>Address</th>
+                <th style={tableHeaderStyle}>GST Number</th>
                 <th style={tableHeaderStyle}>Status</th>
-                <th style={tableHeaderStyle}>Created</th>
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredItems.map((item) => (
-                <tr key={item.ItemId} style={{ borderBottom: '1px solid #ddd' }}>
-                  <td style={tableCellStyle}>{item.ItemId}</td>
+              {filteredSuppliers.map((supplier) => (
+                <tr key={supplier.SupplierId} style={{ borderBottom: '1px solid #ddd' }}>
+                  <td style={tableCellStyle}>{supplier.SupplierId}</td>
                   <td style={tableCellStyle}>
-                    <strong>{item.ItemName}</strong>
-                    {item.Description && (
-                      <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                        {item.Description.substring(0, 50)}
-                        {item.Description.length > 50 && '...'}
-                      </div>
+                    <strong>{supplier.SupplierName}</strong>
+                  </td>
+                  <td style={tableCellStyle}>{supplier.Contact}</td>
+                  <td style={tableCellStyle}>
+                    <a 
+                      href={`mailto:${supplier.Email}`}
+                      style={{ color: '#1976d2', textDecoration: 'none' }}
+                    >
+                      {supplier.Email}
+                    </a>
+                  </td>
+                  <td style={tableCellStyle}>
+                    {supplier.Address ? (
+                      <span style={{ fontSize: '13px' }}>
+                        {supplier.Address.length > 40 
+                          ? `${supplier.Address.substring(0, 40)}...` 
+                          : supplier.Address}
+                      </span>
+                    ) : (
+                      <span style={{ color: '#999', fontStyle: 'italic' }}>-</span>
                     )}
                   </td>
-                  <td style={tableCellStyle}>{item.SKU}</td>
-                  <td style={tableCellStyle}>{item.Barcode}</td>
                   <td style={tableCellStyle}>
-                    <strong>{formatPrice(item.UnitPrice)}</strong>
+                    <code style={{ 
+                      backgroundColor: '#f5f5f5', 
+                      padding: '4px 8px', 
+                      borderRadius: '4px',
+                      fontSize: '12px'
+                    }}>
+                      {supplier.GSTNumber}
+                    </code>
                   </td>
-                  <td style={tableCellStyle}>{item.ReorderLevel}</td>
                   <td style={tableCellStyle}>
                     <span style={{
                       padding: '4px 8px',
                       borderRadius: '4px',
                       fontSize: '12px',
                       fontWeight: 'bold',
-                      backgroundColor: item.IsActive ? '#4caf50' : '#f44336',
+                      backgroundColor: supplier.IsActive ? '#4caf50' : '#f44336',
                       color: 'white',
                     }}>
-                      {item.IsActive ? 'Active' : 'Inactive'}
+                      {supplier.IsActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
-                  <td style={tableCellStyle}>{formatDate(item.CreatedAt)}</td>
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       {onEdit && (
                         <button
                           onClick={() => {
-                            console.log('Editing item:', item);
-                            onEdit(item);
+                            console.log('Editing supplier:', supplier);
+                            onEdit(supplier);
                           }}
                           style={{
                             padding: '6px 12px',
@@ -178,7 +180,7 @@ export default function ItemList({ onEdit }: ItemListProps) {
                         </button>
                       )}
                       <button
-                        onClick={() => handleDelete(item.ItemId)}
+                        onClick={() => handleDelete(supplier.SupplierId)}
                         style={{
                           padding: '6px 12px',
                           backgroundColor: '#d32f2f',

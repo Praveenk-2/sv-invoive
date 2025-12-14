@@ -96,7 +96,7 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
       padding: '20px', 
       backgroundColor: '#f5f5f5',
       borderRadius: '8px',
-      maxWidth: '600px'
+      // maxWidth: '600px'
     }}>
       <h2>{userToEdit ? 'Edit User' : 'Create New User'}</h2>
 

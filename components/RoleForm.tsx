@@ -73,7 +73,7 @@ export default function RoleForm({ roleToEdit, onSuccess, onCancel }: RoleFormPr
       padding: '20px', 
       backgroundColor: '#f5f5f5',
       borderRadius: '8px',
-      maxWidth: '500px'
+      // maxWidth: '500px'
     }}>
       <h2>{roleToEdit ? 'Edit Role' : 'Create New Role'}</h2>
 

@@ -1,35 +1,35 @@
-// Complete Users management page with modal popup form
+// Complete Categories management page with modal popup form
 'use client';
 
 import React, { useState } from 'react';
-import UserList from '@/components/UserList';
-import UserForm from '@/components/UserForm';
-import { User } from '@/types/user.types';
 import DashboardLayout from '@/components/DashboardLayout';
+import CategoryList from '@/components/CategoryList';
+import CategoryForm from '@/components/CategoryForm';
+import { Category } from '@/types/category.types';
 
-export default function UsersPage() {
+export default function CategoriesPage() {
   const [showForm, setShowForm] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const handleEdit = (user: User) => {
-    setEditingUser(user);
+  const handleEdit = (category: Category) => {
+    setEditingCategory(category);
     setShowForm(true);
   };
 
   const handleSuccess = () => {
     setShowForm(false);
-    setEditingUser(null);
+    setEditingCategory(null);
     setRefreshKey(prev => prev + 1);
   };
 
   const handleCancel = () => {
     setShowForm(false);
-    setEditingUser(null);
+    setEditingCategory(null);
   };
 
   const handleCreateNew = () => {
-    setEditingUser(null);
+    setEditingCategory(null);
     setShowForm(true);
   };
 
@@ -44,7 +44,12 @@ export default function UsersPage() {
           paddingBottom: '20px',
           borderBottom: '2px solid #1976d2'
         }}>
-          <h1 style={{ margin: 0, color: '#1976d2' }}>User Management</h1>
+          <div>
+            <h1 style={{ margin: 0, color: '#1976d2' }}>Item Category Management</h1>
+            <p style={{ margin: '5px 0 0 0', color: '#666' }}>
+              Organize your items into categories for better management
+            </p>
+          </div>
           <button
             onClick={handleCreateNew}
             style={{
@@ -58,11 +63,11 @@ export default function UsersPage() {
               fontWeight: 'bold',
             }}
           >
-            + Create New User
+            + Create New Category
           </button>
         </div>
 
-        <UserList key={refreshKey} onEdit={handleEdit} />
+        <CategoryList key={refreshKey} onEdit={handleEdit} />
       </div>
 
       {/* Modal Overlay */}
@@ -110,7 +115,7 @@ export default function UsersPage() {
               zIndex: 1,
             }}>
               <h2 style={{ margin: 0, color: '#1976d2' }}>
-                {editingUser ? 'Edit User' : 'Create New User'}
+                {editingCategory ? 'Edit Category' : 'Create New Category'}
               </h2>
               <button
                 onClick={handleCancel}
@@ -137,8 +142,8 @@ export default function UsersPage() {
 
             {/* Modal Body */}
             <div style={{ padding: '20px' }}>
-              <UserForm 
-                userToEdit={editingUser}
+              <CategoryForm 
+                categoryToEdit={editingCategory}
                 onSuccess={handleSuccess}
                 onCancel={handleCancel}
               />

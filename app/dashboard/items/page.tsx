@@ -1,4 +1,4 @@
-// Complete Items management page with all CRUD operations
+// Complete Items management page with modal popup form
 'use client';
 
 import React, { useState } from 'react';
@@ -15,7 +15,6 @@ export default function ItemsPage() {
   const handleEdit = (item: Item) => {
     setEditingItem(item);
     setShowForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSuccess = () => {
@@ -32,7 +31,6 @@ export default function ItemsPage() {
   const handleCreateNew = () => {
     setEditingItem(null);
     setShowForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -69,18 +67,90 @@ export default function ItemsPage() {
           </button>
         </div>
 
-        {showForm && (
-          <div style={{ marginBottom: '30px' }}>
-            <ItemForm 
-              itemToEdit={editingItem}
-              onSuccess={handleSuccess}
-              onCancel={handleCancel}
-            />
-          </div>
-        )}
-
         <ItemList key={refreshKey} onEdit={handleEdit} />
       </div>
+
+      {/* Modal Overlay */}
+      {showForm && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000,
+            padding: '20px',
+          }}
+          onClick={handleCancel}
+        >
+          {/* Modal Content */}
+          <div
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.15)',
+              maxWidth: '700px',
+              width: '100%',
+              maxHeight: '90vh',
+              overflow: 'auto',
+              position: 'relative',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{
+              padding: '20px',
+              borderBottom: '1px solid #e0e0e0',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              position: 'sticky',
+              top: 0,
+              backgroundColor: 'white',
+              zIndex: 1,
+            }}>
+              <h2 style={{ margin: 0, color: '#1976d2' }}>
+                {editingItem ? 'Edit Item' : 'Create New Item'}
+              </h2>
+              <button
+                onClick={handleCancel}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  color: '#666',
+                  padding: '0',
+                  width: '30px',
+                  height: '30px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '4px',
+                }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: '20px' }}>
+              <ItemForm 
+                itemToEdit={editingItem}
+                onSuccess={handleSuccess}
+                onCancel={handleCancel}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }

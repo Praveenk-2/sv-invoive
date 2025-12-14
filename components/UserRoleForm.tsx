@@ -101,7 +101,7 @@ export default function UserRoleForm({ userRoleToEdit, onSuccess, onCancel }: Us
       padding: '20px', 
       backgroundColor: '#f5f5f5',
       borderRadius: '8px',
-      maxWidth: '600px'
+      // maxWidth: '600px'
     }}>
       <h2>{userRoleToEdit ? 'Edit User Role Assignment' : 'Create New User Role Assignment'}</h2>
 

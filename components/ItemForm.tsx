@@ -121,7 +121,7 @@ export default function ItemForm({ itemToEdit, onSuccess, onCancel }: ItemFormPr
       padding: '20px', 
       backgroundColor: '#f5f5f5',
       borderRadius: '8px',
-      maxWidth: '800px'
+      // maxWidth: '800px'
     }}>
       <h2>{itemToEdit ? 'Edit Item' : 'Create New Item'}</h2>
 

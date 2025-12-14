@@ -1,30 +1,30 @@
-// Component to display list of users
+// Component to display list of categories
 'use client';
 
 import React from 'react';
-import { useUsers } from '@/hooks/useUsers';
-import { userService } from '@/services/userService';
-import { User } from '@/types/user.types';
+import { useCategories } from '@/hooks/useCategories';
+import { categoryService } from '@/services/categoryService';
+import { Category } from '@/types/category.types';
 
-interface UserListProps {
-  onEdit?: (user: User) => void;
+interface CategoryListProps {
+  onEdit?: (category: Category) => void;
 }
 
-export default function UserList({ onEdit }: UserListProps) {
-  const { users, loading, error, refetch } = useUsers();
+export default function CategoryList({ onEdit }: CategoryListProps) {
+  const { categories, loading, error, refetch } = useCategories();
 
   const handleDelete = async (id: number) => {
-    console.log('Deleting user with ID:', id);
+    console.log('Deleting category with ID:', id);
     
-    if (!confirm('Are you sure you want to delete this user?')) return;
+    if (!confirm('Are you sure you want to delete this category?')) return;
 
     try {
-      await userService.deleteUser(id);
-      alert('User deleted successfully!');
+      await categoryService.deleteCategory(id);
+      alert('Category deleted successfully!');
       refetch();
     } catch (err: any) {
-      console.error('Error deleting user:', err);
-      const errorMsg = err?.response?.data?.message || err.message || 'Failed to delete user';
+      console.error('Error deleting category:', err);
+      const errorMsg = err?.response?.data?.message || err.message || 'Failed to delete category';
       alert(errorMsg);
     }
   };
@@ -42,7 +42,7 @@ export default function UserList({ onEdit }: UserListProps) {
   if (loading) {
     return (
       <div style={{ padding: '20px', textAlign: 'center' }}>
-        Loading users...
+        Loading categories...
       </div>
     );
   }
@@ -63,11 +63,11 @@ export default function UserList({ onEdit }: UserListProps) {
 
   return (
     <div style={{ padding: '20px' }}>
-      <h2>All Users ({users.length})</h2>
+      <h2>All Categories ({categories.length})</h2>
       
-      {users.length === 0 ? (
+      {categories.length === 0 ? (
         <p style={{ color: '#666', fontStyle: 'italic' }}>
-          No users found. Create your first user!
+          No categories found. Create your first category!
         </p>
       ) : (
         <div className='scroll-bar'  style={{ overflowX: 'auto' }}>
@@ -75,45 +75,56 @@ export default function UserList({ onEdit }: UserListProps) {
             width: '100%', 
             borderCollapse: 'collapse', 
             marginTop: '20px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            minWidth: '900px'
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
           }}>
             <thead>
               <tr style={{ backgroundColor: '#1976d2', color: 'white' }}>
-                <th style={tableHeaderStyle}>User ID</th>
-                <th style={tableHeaderStyle}>Username</th>
-                <th style={tableHeaderStyle}>Email</th>
+                <th style={tableHeaderStyle}>Category ID</th>
+                <th style={tableHeaderStyle}>Category Name</th>
+                <th style={tableHeaderStyle}>Description</th>
                 <th style={tableHeaderStyle}>Status</th>
                 <th style={tableHeaderStyle}>Created At</th>
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
-                <tr key={user.UserId} style={{ borderBottom: '1px solid #ddd' }}>
-                  <td style={tableCellStyle}>{user.UserId}</td>
-                  <td style={tableCellStyle}>{user.Username}</td>
-                  <td style={tableCellStyle}>{user.Email}</td>
+              {categories.map((category) => (
+                <tr key={category.CategoryId} style={{ borderBottom: '1px solid #ddd' }}>
+                  <td style={tableCellStyle}>{category.CategoryId}</td>
+                  <td style={tableCellStyle}>
+                    <strong>{category.CategoryName}</strong>
+                  </td>
+                  <td style={tableCellStyle}>
+                    {category.Description ? (
+                      <span style={{ color: '#666' }}>
+                        {category.Description.length > 60 
+                          ? `${category.Description.substring(0, 60)}...` 
+                          : category.Description}
+                      </span>
+                    ) : (
+                      <span style={{ color: '#999', fontStyle: 'italic' }}>No description</span>
+                    )}
+                  </td>
                   <td style={tableCellStyle}>
                     <span style={{
                       padding: '4px 8px',
                       borderRadius: '4px',
                       fontSize: '12px',
                       fontWeight: 'bold',
-                      backgroundColor: user.IsActive ? '#4caf50' : '#f44336',
+                      backgroundColor: category.IsActive ? '#4caf50' : '#f44336',
                       color: 'white',
                     }}>
-                      {user.IsActive ? 'Active' : 'Inactive'}
+                      {category.IsActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
-                  <td style={tableCellStyle}>{formatDate(user.CreatedAt)}</td>
+                  <td style={tableCellStyle}>{formatDate(category.CreatedAt)}</td>
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       {onEdit && (
                         <button
                           onClick={() => {
-                            console.log('Editing user:', user);
-                            onEdit(user);
+                            console.log('Editing category:', category);
+                            onEdit(category);
                           }}
                           style={{
                             padding: '6px 12px',
@@ -128,7 +139,7 @@ export default function UserList({ onEdit }: UserListProps) {
                         </button>
                       )}
                       <button
-                        onClick={() => handleDelete(user.UserId)}
+                        onClick={() => handleDelete(category.CategoryId)}
                         style={{
                           padding: '6px 12px',
                           backgroundColor: '#d32f2f',
