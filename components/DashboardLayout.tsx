@@ -200,7 +200,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 setSidebarOpen(false);
               }
             }}
-            className="w-full flex items-center px-4 py-3 text-red-500 hover:bg-red-50 rounded-lg transition-all font-medium"
+            className="w-full flex items-center px-4 py-3 text-red-500 hover:cursor-pointer hover:bg-red-50 rounded-lg transition-all font-medium"
           >
             <LogOut className="h-5 w-5 mr-3" />
             Logout

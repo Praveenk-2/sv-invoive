@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
   const router = useRouter();
-  return (router.push('/dashboard/master'));
+  return (router.push('/dashboard/roles'));
 
   return (
     // <ProtectedRoute>
