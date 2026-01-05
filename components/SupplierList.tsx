@@ -30,6 +30,22 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getUserName = (userId: number) => {
+    if (!userId) return '-';
+    return `User #${userId}`;
+  };
+
   // Filter suppliers based on search
   const filteredSuppliers = suppliers.filter(supplier =>
     supplier.SupplierName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -90,13 +106,13 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
           {searchTerm ? 'No suppliers found matching your search.' : 'No suppliers found. Add your first supplier!'}
         </p>
       ) : (
-        <div className='scroll-bar'  style={{ overflowX: 'auto' }}>
+        <div style={{ overflowX: 'auto' }} className='scroll-bar'>
           <table style={{ 
             width: '100%', 
             borderCollapse: 'collapse', 
             marginTop: '20px',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            minWidth: '1100px'
+            minWidth: '1400px'
           }}>
             <thead>
               <tr style={{ backgroundColor: '#1976d2', color: 'white' }}>
@@ -104,9 +120,12 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
                 <th style={tableHeaderStyle}>Supplier Name</th>
                 <th style={tableHeaderStyle}>Contact</th>
                 <th style={tableHeaderStyle}>Email</th>
-                <th style={tableHeaderStyle}>Address</th>
                 <th style={tableHeaderStyle}>GST Number</th>
                 <th style={tableHeaderStyle}>Status</th>
+                <th style={tableHeaderStyle}>Created At</th>
+                <th style={tableHeaderStyle}>Created By</th>
+                <th style={tableHeaderStyle}>Modified By</th>
+                <th style={tableHeaderStyle}>Modified At</th>
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
@@ -115,9 +134,22 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
                 <tr key={supplier.SupplierId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>{supplier.SupplierId}</td>
                   <td style={tableCellStyle}>
-                    <strong>{supplier.SupplierName}</strong>
+                    <strong style={{ color: '#1976d2' }}>{supplier.SupplierName}</strong>
+                    {supplier.Address && (
+                      <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>
+                        {supplier.Address.substring(0, 40)}
+                        {supplier.Address.length > 40 && '...'}
+                      </div>
+                    )}
                   </td>
-                  <td style={tableCellStyle}>{supplier.Contact}</td>
+                  <td style={tableCellStyle}>
+                    <a 
+                      href={`tel:${supplier.Contact}`}
+                      style={{ color: '#1976d2', textDecoration: 'none' }}
+                    >
+                      {supplier.Contact}
+                    </a>
+                  </td>
                   <td style={tableCellStyle}>
                     <a 
                       href={`mailto:${supplier.Email}`}
@@ -125,17 +157,6 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
                     >
                       {supplier.Email}
                     </a>
-                  </td>
-                  <td style={tableCellStyle}>
-                    {supplier.Address ? (
-                      <span style={{ fontSize: '13px' }}>
-                        {supplier.Address.length > 40 
-                          ? `${supplier.Address.substring(0, 40)}...` 
-                          : supplier.Address}
-                      </span>
-                    ) : (
-                      <span style={{ color: '#999', fontStyle: 'italic' }}>-</span>
-                    )}
                   </td>
                   <td style={tableCellStyle}>
                     <code style={{ 
@@ -157,6 +178,36 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
                       color: 'white',
                     }}>
                       {supplier.IsActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <span style={{ fontSize: '13px', color: '#666' }}>
+                      {formatDate(supplier.CreatedAt)}
+                    </span>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <span style={{ 
+                      backgroundColor: '#e3f2fd', 
+                      padding: '4px 8px', 
+                      borderRadius: '4px',
+                      fontSize: '12px'
+                    }}>
+                      {getUserName(supplier.CreatedBy)}
+                    </span>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <span style={{ 
+                      backgroundColor: '#fff3e0', 
+                      padding: '4px 8px', 
+                      borderRadius: '4px',
+                      fontSize: '12px'
+                    }}>
+                      {getUserName(supplier.ModifiyBy)}
+                    </span>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <span style={{ fontSize: '13px', color: '#666' }}>
+                      {formatDate(supplier.ModifiyAt)}
                     </span>
                   </td>
                   <td style={tableCellStyle}>

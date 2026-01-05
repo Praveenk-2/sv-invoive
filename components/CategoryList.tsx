@@ -30,6 +30,7 @@ export default function CategoryList({ onEdit }: CategoryListProps) {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -37,6 +38,11 @@ export default function CategoryList({ onEdit }: CategoryListProps) {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const getUserName = (userId: number) => {
+    if (!userId) return '-';
+    return `User #${userId}`;
   };
 
   if (loading) {
@@ -70,12 +76,13 @@ export default function CategoryList({ onEdit }: CategoryListProps) {
           No categories found. Create your first category!
         </p>
       ) : (
-        <div className='scroll-bar'  style={{ overflowX: 'auto' }}>
+        <div style={{ overflowX: 'auto' }} className='scroll-bar'>
           <table style={{ 
             width: '100%', 
             borderCollapse: 'collapse', 
             marginTop: '20px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            minWidth: '1100px'
           }}>
             <thead>
               <tr style={{ backgroundColor: '#1976d2', color: 'white' }}>
@@ -84,6 +91,9 @@ export default function CategoryList({ onEdit }: CategoryListProps) {
                 <th style={tableHeaderStyle}>Description</th>
                 <th style={tableHeaderStyle}>Status</th>
                 <th style={tableHeaderStyle}>Created At</th>
+                <th style={tableHeaderStyle}>Created By</th>
+                <th style={tableHeaderStyle}>Modified By</th>
+                <th style={tableHeaderStyle}>Modified At</th>
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
@@ -92,11 +102,11 @@ export default function CategoryList({ onEdit }: CategoryListProps) {
                 <tr key={category.CategoryId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>{category.CategoryId}</td>
                   <td style={tableCellStyle}>
-                    <strong>{category.CategoryName}</strong>
+                    <strong style={{ color: '#1976d2' }}>{category.CategoryName}</strong>
                   </td>
                   <td style={tableCellStyle}>
                     {category.Description ? (
-                      <span style={{ color: '#666' }}>
+                      <span style={{ color: '#666', fontSize: '13px' }}>
                         {category.Description.length > 60 
                           ? `${category.Description.substring(0, 60)}...` 
                           : category.Description}
@@ -117,7 +127,36 @@ export default function CategoryList({ onEdit }: CategoryListProps) {
                       {category.IsActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
-                  <td style={tableCellStyle}>{formatDate(category.CreatedAt)}</td>
+                  <td style={tableCellStyle}>
+                    <span style={{ fontSize: '13px', color: '#666' }}>
+                      {formatDate(category.CreatedAt)}
+                    </span>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <span style={{ 
+                      backgroundColor: '#e3f2fd', 
+                      padding: '4px 8px', 
+                      borderRadius: '4px',
+                      fontSize: '12px'
+                    }}>
+                      {getUserName(category.CreatedBy)}
+                    </span>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <span style={{ 
+                      backgroundColor: '#fff3e0', 
+                      padding: '4px 8px', 
+                      borderRadius: '4px',
+                      fontSize: '12px'
+                    }}>
+                      {getUserName(category.ModifiyBy)}
+                    </span>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <span style={{ fontSize: '13px', color: '#666' }}>
+                      {formatDate(category.ModifiyAt)}
+                    </span>
+                  </td>
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       {onEdit && (

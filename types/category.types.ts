@@ -1,4 +1,4 @@
-// Define Category types based on your database structure
+// Define Category types based on your UPDATED database structure
 
 export interface Category {
   CategoryId: number;
@@ -6,6 +6,9 @@ export interface Category {
   Description: string;
   IsActive: boolean;
   CreatedAt: string;
+  CreatedBy: number;  // UserId (number)
+  ModifiyBy: number;  // UserId (number)
+  ModifiyAt: string;
 }
 
 export interface CreateCategoryRequest {
@@ -14,6 +17,9 @@ export interface CreateCategoryRequest {
   Description: string;
   IsActive: boolean;
   CreatedAt?: string;
+  CreatedBy: number;
+  ModifiyBy?: number;
+  ModifiyAt?: string;
 }
 
 export interface UpdateCategoryRequest {
@@ -22,4 +28,7 @@ export interface UpdateCategoryRequest {
   Description: string;
   IsActive: boolean;
   CreatedAt?: string;
+  CreatedBy?: number;
+  ModifiyBy: number;
+  ModifiyAt?: string;
 }

@@ -1,4 +1,3 @@
-// Complete Suppliers management page with modal popup form
 'use client';
 
 import React, { useState } from 'react';
@@ -35,122 +34,48 @@ export default function SuppliersPage() {
 
   return (
     <DashboardLayout>
-      <div style={{ padding: '20px', maxWidth: '1600px', margin: '0 auto' }}>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          marginBottom: '30px',
-          paddingBottom: '20px',
-          borderBottom: '2px solid #1976d2'
-        }}>
+      <div className="p-5 max-w-[1700px] mx-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8 pb-5 border-b-2 border-blue-600">
           <div>
-            <h1 style={{ margin: 0, color: '#1976d2' }}>Supplier Management</h1>
-            <p style={{ margin: '5px 0 0 0', color: '#666' }}>
-              Manage your suppliers, contacts, and GST information
+            <h1 className="text-2xl font-bold text-blue-600">
+              Supplier Management
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Manage suppliers, contacts, and GST information with full audit trail
             </p>
           </div>
+
           <button
             onClick={handleCreateNew}
-            style={{
-              padding: '12px 24px',
-              backgroundColor: '#1976d2',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '16px',
-              fontWeight: 'bold',
-            }}
+            className="px-6 py-3 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 transition"
           >
             + Add New Supplier
           </button>
         </div>
 
-        <SupplierList key={refreshKey} onEdit={handleEdit} />
-      </div>
-
-      {/* Modal Overlay */}
-      {showForm && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 1000,
-            padding: '20px',
-          }}
-          onClick={handleCancel}
-        >
-          {/* Modal Content */}
-          <div
-            style={{
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.15)',
-              maxWidth: '700px',
-              width: '100%',
-              maxHeight: '90vh',
-              overflow: 'auto',
-              position: 'relative',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div style={{
-              padding: '20px',
-              borderBottom: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              position: 'sticky',
-              top: 0,
-              backgroundColor: 'white',
-              zIndex: 1,
-            }}>
-              <h2 style={{ margin: 0, color: '#1976d2' }}>
-                {editingSupplier ? 'Edit Supplier' : 'Add New Supplier'}
-              </h2>
+        {/* 🔥 Tailwind Modal */}
+        {showForm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-white w-full max-w-3xl rounded-lg shadow-xl p-6 relative max-h-[90vh] overflow-y-auto scroll-bar">
               <button
                 onClick={handleCancel}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '24px',
-                  cursor: 'pointer',
-                  color: '#666',
-                  padding: '0',
-                  width: '30px',
-                  height: '30px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '4px',
-                }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                className="absolute top-1 right-1 text-gray-500 hover:text-red-500 text-xl cursor-pointer"
               >
-                ×
+                ✕
               </button>
-            </div>
 
-            {/* Modal Body */}
-            <div style={{ padding: '20px' }}>
-              <SupplierForm 
+              <SupplierForm
                 supplierToEdit={editingSupplier}
                 onSuccess={handleSuccess}
                 onCancel={handleCancel}
               />
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        <SupplierList key={refreshKey} onEdit={handleEdit} />
+      </div>
     </DashboardLayout>
   );
 }

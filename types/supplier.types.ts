@@ -1,4 +1,4 @@
-// Define Supplier types based on your database structure
+// Define Supplier types based on your UPDATED database structure
 
 export interface Supplier {
   SupplierId: number;
@@ -8,6 +8,10 @@ export interface Supplier {
   Address: string;
   GSTNumber: string;
   IsActive: boolean;
+  CreatedBy: number;  // UserId (number)
+  CreatedAt: string;
+  ModifiyBy: number;  // UserId (number)
+  ModifiyAt: string;
 }
 
 export interface CreateSupplierRequest {
@@ -18,6 +22,10 @@ export interface CreateSupplierRequest {
   Address: string;
   GSTNumber: string;
   IsActive: boolean;
+  CreatedBy: number;
+  CreatedAt?: string;
+  ModifiyBy?: number;
+  ModifiyAt?: string;
 }
 
 export interface UpdateSupplierRequest {
@@ -28,4 +36,8 @@ export interface UpdateSupplierRequest {
   Address: string;
   GSTNumber: string;
   IsActive: boolean;
+  CreatedBy?: number;
+  CreatedAt?: string;
+  ModifiyBy: number;
+  ModifiyAt?: string;
 }

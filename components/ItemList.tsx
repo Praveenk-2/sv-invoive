@@ -31,6 +31,7 @@ export default function ItemList({ onEdit }: ItemListProps) {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -43,6 +44,11 @@ export default function ItemList({ onEdit }: ItemListProps) {
       style: 'currency',
       currency: 'USD'
     }).format(price);
+  };
+
+  const getUserName = (userId: number) => {
+    if (!userId) return '-';
+    return `User #${userId}`;
   };
 
   // Filter items based on search
@@ -104,24 +110,25 @@ export default function ItemList({ onEdit }: ItemListProps) {
           {searchTerm ? 'No items found matching your search.' : 'No items found. Create your first item!'}
         </p>
       ) : (
-        <div className='scroll-bar'  style={{ overflowX: 'auto' }}>
+        <div style={{ overflowX: 'auto' }} className='scroll-bar'>
           <table style={{ 
             width: '100%', 
             borderCollapse: 'collapse', 
             marginTop: '20px',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            minWidth: '1200px'
+            minWidth: '1400px'
           }}>
             <thead>
               <tr style={{ backgroundColor: '#1976d2', color: 'white' }}>
                 <th style={tableHeaderStyle}>ID</th>
                 <th style={tableHeaderStyle}>Item Name</th>
                 <th style={tableHeaderStyle}>SKU</th>
-                <th style={tableHeaderStyle}>Barcode</th>
-                <th style={tableHeaderStyle}>Unit Price</th>
-                <th style={tableHeaderStyle}>Reorder Level</th>
+                <th style={tableHeaderStyle}>Price</th>
+                <th style={tableHeaderStyle}>Reorder</th>
                 <th style={tableHeaderStyle}>Status</th>
                 <th style={tableHeaderStyle}>Created</th>
+                <th style={tableHeaderStyle}>Created By</th>
+                <th style={tableHeaderStyle}>Modified By</th>
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
@@ -138,8 +145,16 @@ export default function ItemList({ onEdit }: ItemListProps) {
                       </div>
                     )}
                   </td>
-                  <td style={tableCellStyle}>{item.SKU}</td>
-                  <td style={tableCellStyle}>{item.Barcode}</td>
+                  <td style={tableCellStyle}>
+                    <code style={{ 
+                      backgroundColor: '#f5f5f5', 
+                      padding: '4px 8px', 
+                      borderRadius: '4px',
+                      fontSize: '12px'
+                    }}>
+                      {item.SKU}
+                    </code>
+                  </td>
                   <td style={tableCellStyle}>
                     <strong>{formatPrice(item.UnitPrice)}</strong>
                   </td>
@@ -156,7 +171,31 @@ export default function ItemList({ onEdit }: ItemListProps) {
                       {item.IsActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
-                  <td style={tableCellStyle}>{formatDate(item.CreatedAt)}</td>
+                  <td style={tableCellStyle}>
+                    <span style={{ fontSize: '13px', color: '#666' }}>
+                      {formatDate(item.CreatedAt)}
+                    </span>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <span style={{ 
+                      backgroundColor: '#e3f2fd', 
+                      padding: '4px 8px', 
+                      borderRadius: '4px',
+                      fontSize: '12px'
+                    }}>
+                      {getUserName(item.CreatedBy)}
+                    </span>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <span style={{ 
+                      backgroundColor: '#fff3e0', 
+                      padding: '4px 8px', 
+                      borderRadius: '4px',
+                      fontSize: '12px'
+                    }}>
+                      {getUserName(item.ModifiyBy)}
+                    </span>
+                  </td>
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       {onEdit && (

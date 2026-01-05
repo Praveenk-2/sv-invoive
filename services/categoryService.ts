@@ -1,3 +1,4 @@
+// services/categoryService.ts
 // All Category API operations
 import axiosInstance from '@/lib/axios/axiosInstance';
 import { Category, CreateCategoryRequest, UpdateCategoryRequest } from '@/types/category.types';
@@ -11,16 +12,42 @@ export const categoryService = {
   },
 
   // POST: Create new category
-  // Endpoint: POST /Post (based on your screenshot)
+  // Endpoint: POST /api/ItemCatagory
   createCategory: async (categoryData: CreateCategoryRequest): Promise<Category> => {
-    const response = await axiosInstance.post<Category>('/Post', categoryData);
+    // Convert PascalCase to camelCase for API
+    const payload = {
+      categoryId: categoryData.CategoryId,
+      categoryName: categoryData.CategoryName,
+      description: categoryData.Description,
+      isActive: categoryData.IsActive,
+      createdAt: categoryData.CreatedAt || new Date().toISOString(),
+      createdBy: categoryData.CreatedBy,
+      modifiyBy: categoryData.ModifiyBy || 0,
+      modifiyAt: new Date().toISOString()
+    };
+    
+    console.log('Service sending payload:', JSON.stringify(payload, null, 2));
+    const response = await axiosInstance.post<Category>('/ItemCatagory', payload);
     return response.data;
   },
 
   // PUT: Update category
   // Endpoint: PUT /api/ItemCatagory/{id}
   updateCategory: async (id: number, categoryData: UpdateCategoryRequest): Promise<Category> => {
-    const response = await axiosInstance.put<Category>(`/ItemCatagory/${id}`, categoryData);
+    // Convert PascalCase to camelCase for API
+    const payload = {
+      categoryId: categoryData.CategoryId,
+      categoryName: categoryData.CategoryName,
+      description: categoryData.Description,
+      isActive: categoryData.IsActive,
+      createdAt: categoryData.CreatedAt,
+      createdBy: categoryData.CreatedBy,
+      modifiyBy: categoryData.ModifiyBy,
+      modifiyAt: new Date().toISOString()
+    };
+    
+    console.log('Service sending payload:', JSON.stringify(payload, null, 2));
+    const response = await axiosInstance.put<Category>(`/ItemCatagory/${id}`, payload);
     return response.data;
   },
 

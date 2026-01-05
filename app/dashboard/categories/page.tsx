@@ -1,4 +1,4 @@
-// Complete Categories management page with modal popup form
+// Complete Categories management page
 'use client';
 
 import React, { useState } from 'react';
@@ -15,6 +15,7 @@ export default function CategoriesPage() {
   const handleEdit = (category: Category) => {
     setEditingCategory(category);
     setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSuccess = () => {
@@ -31,11 +32,12 @@ export default function CategoriesPage() {
   const handleCreateNew = () => {
     setEditingCategory(null);
     setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <DashboardLayout>
-      <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ padding: '20px', maxWidth: '1500px', margin: '0 auto' }}>
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
@@ -47,7 +49,7 @@ export default function CategoriesPage() {
           <div>
             <h1 style={{ margin: 0, color: '#1976d2' }}>Item Category Management</h1>
             <p style={{ margin: '5px 0 0 0', color: '#666' }}>
-              Organize your items into categories for better management
+              Organize items into categories with full audit trail tracking
             </p>
           </div>
           <button
@@ -67,90 +69,26 @@ export default function CategoriesPage() {
           </button>
         </div>
 
-        <CategoryList key={refreshKey} onEdit={handleEdit} />
-      </div>
-
-      {/* Modal Overlay */}
-      {showForm && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 1000,
-            padding: '20px',
-          }}
-          onClick={handleCancel}
-        >
-          {/* Modal Content */}
-          <div
-            style={{
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.15)',
-              maxWidth: '600px',
-              width: '100%',
-              maxHeight: '90vh',
-              overflow: 'auto',
-              position: 'relative',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div style={{
-              padding: '20px',
-              borderBottom: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              position: 'sticky',
-              top: 0,
-              backgroundColor: 'white',
-              zIndex: 1,
-            }}>
-              <h2 style={{ margin: 0, color: '#1976d2' }}>
-                {editingCategory ? 'Edit Category' : 'Create New Category'}
-              </h2>
+        {showForm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-white w-full max-w-3xl rounded-lg shadow-xl p-6 relative max-h-[90vh] overflow-y-auto scroll-bar">
               <button
                 onClick={handleCancel}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '24px',
-                  cursor: 'pointer',
-                  color: '#666',
-                  padding: '0',
-                  width: '30px',
-                  height: '30px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '4px',
-                }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                className="absolute top-1 right-1 text-gray-500 hover:text-red-500 text-xl cursor-pointer"
               >
-                ×
+                ✕
               </button>
-            </div>
-
-            {/* Modal Body */}
-            <div style={{ padding: '20px' }}>
-              <CategoryForm 
-                categoryToEdit={editingCategory}
-                onSuccess={handleSuccess}
-                onCancel={handleCancel}
-              />
-            </div>
+            <CategoryForm 
+              categoryToEdit={editingCategory}
+              onSuccess={handleSuccess}
+              onCancel={handleCancel}
+            />
           </div>
         </div>
-      )}
+        )}
+
+        <CategoryList key={refreshKey} onEdit={handleEdit} />
+      </div>
     </DashboardLayout>
   );
 }

@@ -26,7 +26,6 @@ export const useRoles = () => {
     fetchRoles();
   }, []);
 
-  // Function to refetch roles (useful after create/update/delete)
   const refetch = () => {
     fetchRoles();
   };

@@ -31,14 +31,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // Simple menu items - direct links, no submenus
   const menuItems = [
-    {
-      name: 'Roles',
-      href: '/dashboard/roles',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
+    
     {
       name: 'Users',
       href: '/dashboard/users',
@@ -47,14 +40,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       bgColor: 'bg-blue-50',
       hoverBg: 'hover:bg-blue-100',
     },
-    {
-      name: 'User Roles',
-      href: '/dashboard/user-roles',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
+    
     {
       name: 'Items',
       href: '/dashboard/items',
@@ -74,6 +60,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     {
       name: 'Suppliers',
       href: '/dashboard/suppliers',
+      icon: Settings,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      hoverBg: 'hover:bg-blue-100',
+    },
+     {
+      name: 'Roles',
+      href: '/dashboard/roles',
+      icon: Settings,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      hoverBg: 'hover:bg-blue-100',
+    },
+    {
+      name: 'User Roles',
+      href: '/dashboard/user-roles',
       icon: Settings,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',

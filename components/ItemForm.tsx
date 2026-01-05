@@ -3,7 +3,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { itemService } from '@/services/itemService';
-import { CreateItemRequest, Item } from '@/types/item.types';
+import { Item } from '@/types/item.types';
+import { useAuth } from '@/context/AuthContext';
 
 interface ItemFormProps {
   itemToEdit?: Item | null;
@@ -12,7 +13,9 @@ interface ItemFormProps {
 }
 
 export default function ItemForm({ itemToEdit, onSuccess, onCancel }: ItemFormProps) {
-  const [formData, setFormData] = useState<CreateItemRequest>({
+  const { user } = useAuth();
+
+  const [formData, setFormData] = useState({
     ItemId: 0,
     ItemName: '',
     CategoryId: 0,
@@ -24,13 +27,16 @@ export default function ItemForm({ itemToEdit, onSuccess, onCancel }: ItemFormPr
     ReorderLevel: 0,
     IsActive: true,
     CreatedAt: new Date().toISOString(),
+    CreatedBy: user?.id || 0,
+    ModifiyBy: 0,
+    ModifiyAt: undefined as string | undefined,
   });
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (itemToEdit) {
-      console.log('Editing item:', itemToEdit);
       setFormData({
         ItemId: itemToEdit.ItemId,
         ItemName: itemToEdit.ItemName,
@@ -43,13 +49,15 @@ export default function ItemForm({ itemToEdit, onSuccess, onCancel }: ItemFormPr
         ReorderLevel: itemToEdit.ReorderLevel,
         IsActive: itemToEdit.IsActive,
         CreatedAt: itemToEdit.CreatedAt,
+        CreatedBy: itemToEdit.CreatedBy,
+        ModifiyBy: user?.id || 0,
+        ModifiyAt: new Date().toISOString(),
       });
     } else {
-      setFormData({
+      setFormData(prev => ({
+        ...prev,
         ItemId: 0,
         ItemName: '',
-        CategoryId: 0,
-        UnitId: 0,
         SKU: '',
         Barcode: '',
         Description: '',
@@ -57,71 +65,67 @@ export default function ItemForm({ itemToEdit, onSuccess, onCancel }: ItemFormPr
         ReorderLevel: 0,
         IsActive: true,
         CreatedAt: new Date().toISOString(),
-      });
+        CreatedBy: user?.id || 0,
+        ModifiyBy: 0,
+        ModifiyAt: undefined,
+      }));
     }
-  }, [itemToEdit]);
+  }, [itemToEdit, user]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSubmitting(true);
 
-    console.log('Submitting form data:', formData);
-
     try {
       if (itemToEdit) {
-        console.log('Updating item with ID:', itemToEdit.ItemId);
-        await itemService.updateItem(itemToEdit.ItemId, formData);
+        await itemService.updateItem(itemToEdit.ItemId, {
+          ...formData,
+          ModifiyAt: new Date().toISOString(),
+        });
         alert('Item updated successfully!');
       } else {
-        console.log('Creating new item');
-        await itemService.createItem(formData);
+        await itemService.createItem({
+          ...formData,
+          ModifiyAt: undefined, // ✅ do not send empty string
+        });
         alert('Item created successfully!');
       }
 
-      setFormData({
-        ItemId: 0,
-        ItemName: '',
-        CategoryId: 0,
-        UnitId: 0,
-        SKU: '',
-        Barcode: '',
-        Description: '',
-        UnitPrice: 0,
-        ReorderLevel: 0,
-        IsActive: true,
-        CreatedAt: new Date().toISOString(),
-      });
-      
       if (onSuccess) onSuccess();
     } catch (err: any) {
-      console.error('Error submitting item:', err);
-      const errorMessage = err?.response?.data?.message || err.message || 'Operation failed';
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.response?.data ||
+        err.message ||
+        'Operation failed';
       setError(errorMessage);
     } finally {
       setSubmitting(false);
     }
   };
 
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
-    
+
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : 
-              ['ItemId', 'CategoryId', 'UnitId', 'ReorderLevel'].includes(name) ? Number(value) :
-              name === 'UnitPrice' ? parseFloat(value) || 0 :
-              value,
+      [name]: type === 'checkbox' ? checked :
+        ['ItemId', 'CategoryId', 'UnitId', 'ReorderLevel'].includes(name) ? Number(value) :
+          name === 'UnitPrice' ? parseFloat(value) || 0 :
+            value,
     });
   };
 
   return (
-    <div style={{ 
-      padding: '20px', 
+    <div style={{
+      padding: '20px',
       backgroundColor: '#f5f5f5',
       borderRadius: '8px',
-      // maxWidth: '800px'
+      maxWidth: '900px'
     }}>
       <h2>{itemToEdit ? 'Edit Item' : 'Create New Item'}</h2>
 
@@ -138,11 +142,9 @@ export default function ItemForm({ itemToEdit, onSuccess, onCancel }: ItemFormPr
       )}
 
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
           <div>
-            <label htmlFor="ItemId" style={labelStyle}>
-              Item ID *
-            </label>
+            <label htmlFor="ItemId" style={labelStyle}>Item ID *</label>
             <input
               type="number"
               id="ItemId"
@@ -151,23 +153,13 @@ export default function ItemForm({ itemToEdit, onSuccess, onCancel }: ItemFormPr
               onChange={handleChange}
               required
               disabled={!!itemToEdit}
-              style={{
-                ...inputStyle,
-                backgroundColor: itemToEdit ? '#e0e0e0' : 'white',
-              }}
+              style={{ ...inputStyle, backgroundColor: itemToEdit ? '#e0e0e0' : 'white' }}
               placeholder="e.g., 1"
             />
-            {itemToEdit && (
-              <small style={{ color: '#666', fontSize: '12px' }}>
-                ID cannot be changed
-              </small>
-            )}
           </div>
 
-          <div>
-            <label htmlFor="ItemName" style={labelStyle}>
-              Item Name *
-            </label>
+          <div style={{ gridColumn: 'span 2' }}>
+            <label htmlFor="ItemName" style={labelStyle}>Item Name *</label>
             <input
               type="text"
               id="ItemName"
@@ -181,9 +173,7 @@ export default function ItemForm({ itemToEdit, onSuccess, onCancel }: ItemFormPr
           </div>
 
           <div>
-            <label htmlFor="SKU" style={labelStyle}>
-              SKU *
-            </label>
+            <label htmlFor="SKU" style={labelStyle}>SKU *</label>
             <input
               type="text"
               id="SKU"
@@ -197,9 +187,7 @@ export default function ItemForm({ itemToEdit, onSuccess, onCancel }: ItemFormPr
           </div>
 
           <div>
-            <label htmlFor="Barcode" style={labelStyle}>
-              Barcode *
-            </label>
+            <label htmlFor="Barcode" style={labelStyle}>Barcode *</label>
             <input
               type="text"
               id="Barcode"
@@ -208,14 +196,12 @@ export default function ItemForm({ itemToEdit, onSuccess, onCancel }: ItemFormPr
               onChange={handleChange}
               required
               style={inputStyle}
-              placeholder="e.g., 1234567890123"
+              placeholder="e.g., 123456789"
             />
           </div>
 
           <div>
-            <label htmlFor="CategoryId" style={labelStyle}>
-              Category ID *
-            </label>
+            <label htmlFor="CategoryId" style={labelStyle}>Category ID *</label>
             <input
               type="number"
               id="CategoryId"
@@ -229,9 +215,7 @@ export default function ItemForm({ itemToEdit, onSuccess, onCancel }: ItemFormPr
           </div>
 
           <div>
-            <label htmlFor="UnitId" style={labelStyle}>
-              Unit ID *
-            </label>
+            <label htmlFor="UnitId" style={labelStyle}>Unit ID *</label>
             <input
               type="number"
               id="UnitId"
@@ -245,9 +229,7 @@ export default function ItemForm({ itemToEdit, onSuccess, onCancel }: ItemFormPr
           </div>
 
           <div>
-            <label htmlFor="UnitPrice" style={labelStyle}>
-              Unit Price *
-            </label>
+            <label htmlFor="UnitPrice" style={labelStyle}>Unit Price *</label>
             <input
               type="number"
               id="UnitPrice"
@@ -263,9 +245,7 @@ export default function ItemForm({ itemToEdit, onSuccess, onCancel }: ItemFormPr
           </div>
 
           <div>
-            <label htmlFor="ReorderLevel" style={labelStyle}>
-              Reorder Level *
-            </label>
+            <label htmlFor="ReorderLevel" style={labelStyle}>Reorder Level *</label>
             <input
               type="number"
               id="ReorderLevel"
@@ -281,47 +261,29 @@ export default function ItemForm({ itemToEdit, onSuccess, onCancel }: ItemFormPr
         </div>
 
         <div style={{ marginTop: '15px' }}>
-          <label htmlFor="Description" style={labelStyle}>
-            Description
-          </label>
+          <label htmlFor="Description" style={labelStyle}>Description</label>
           <textarea
             id="Description"
             name="Description"
             value={formData.Description}
             onChange={handleChange}
             rows={3}
-            style={{
-              ...inputStyle,
-              resize: 'vertical',
-            }}
+            style={{ ...inputStyle, resize: 'vertical' }}
             placeholder="Item description..."
           />
         </div>
 
-        <div style={{ marginTop: '15px', marginBottom: '20px' }}>
-          <label style={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            cursor: 'pointer',
-            fontWeight: 'bold'
-          }}>
+        <div style={{ marginTop: '15px', marginBottom: '15px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', fontWeight: 'bold' }}>
             <input
               type="checkbox"
               name="IsActive"
               checked={formData.IsActive}
               onChange={handleChange}
-              style={{
-                marginRight: '10px',
-                width: '20px',
-                height: '20px',
-                cursor: 'pointer',
-              }}
+              style={{ marginRight: '10px', width: '20px', height: '20px', cursor: 'pointer' }}
             />
             Is Active
           </label>
-          <small style={{ color: '#666', fontSize: '12px', marginLeft: '30px' }}>
-            Active items are available for sale
-          </small>
         </div>
 
         <div style={{ display: 'flex', gap: '10px' }}>
@@ -338,6 +300,7 @@ export default function ItemForm({ itemToEdit, onSuccess, onCancel }: ItemFormPr
               borderRadius: '4px',
               cursor: submitting ? 'not-allowed' : 'pointer',
               opacity: submitting ? 0.6 : 1,
+              fontWeight: 'bold',
             }}
           >
             {submitting ? 'Saving...' : (itemToEdit ? 'Update Item' : 'Create Item')}
@@ -357,6 +320,7 @@ export default function ItemForm({ itemToEdit, onSuccess, onCancel }: ItemFormPr
                 border: 'none',
                 borderRadius: '4px',
                 cursor: 'pointer',
+                fontWeight: 'bold',
               }}
             >
               Cancel

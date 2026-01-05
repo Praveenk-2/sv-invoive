@@ -1,9 +1,10 @@
-// Component to create or update categories
+// components/CategoryForm.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { categoryService } from '@/services/categoryService';
-import { CreateCategoryRequest, Category } from '@/types/category.types';
+import { Category } from '@/types/category.types';
+import { useAuth } from '@/context/AuthContext';
 
 interface CategoryFormProps {
   categoryToEdit?: Category | null;
@@ -12,12 +13,17 @@ interface CategoryFormProps {
 }
 
 export default function CategoryForm({ categoryToEdit, onSuccess, onCancel }: CategoryFormProps) {
-  const [formData, setFormData] = useState<CreateCategoryRequest>({
+  const { user } = useAuth();
+  
+  const [formData, setFormData] = useState({
     CategoryId: 0,
     CategoryName: '',
     Description: '',
     IsActive: true,
     CreatedAt: new Date().toISOString(),
+    CreatedBy: user?.id || 0,
+    ModifiyBy: 0,
+    ModifiyAt: new Date().toISOString(),
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -31,6 +37,9 @@ export default function CategoryForm({ categoryToEdit, onSuccess, onCancel }: Ca
         Description: categoryToEdit.Description,
         IsActive: categoryToEdit.IsActive,
         CreatedAt: categoryToEdit.CreatedAt,
+        CreatedBy: categoryToEdit.CreatedBy,
+        ModifiyBy: user?.id || 0,
+        ModifiyAt: new Date().toISOString(),
       });
     } else {
       setFormData({
@@ -39,25 +48,34 @@ export default function CategoryForm({ categoryToEdit, onSuccess, onCancel }: Ca
         Description: '',
         IsActive: true,
         CreatedAt: new Date().toISOString(),
+        CreatedBy: user?.id || 0,
+        ModifiyBy: 0,
+        ModifiyAt: new Date().toISOString(),
       });
     }
-  }, [categoryToEdit]);
+  }, [categoryToEdit, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSubmitting(true);
 
-    console.log('Submitting form data:', formData);
+    console.log('Submitting category data:', formData);
 
     try {
       if (categoryToEdit) {
         console.log('Updating category with ID:', categoryToEdit.CategoryId);
-        await categoryService.updateCategory(categoryToEdit.CategoryId, formData);
+        await categoryService.updateCategory(categoryToEdit.CategoryId, {
+          ...formData,
+          ModifiyAt: new Date().toISOString()
+        });
         alert('Category updated successfully!');
       } else {
         console.log('Creating new category');
-        await categoryService.createCategory(formData);
+        await categoryService.createCategory({
+          ...formData,
+          ModifiyAt: new Date().toISOString()
+        });
         alert('Category created successfully!');
       }
 
@@ -67,12 +85,18 @@ export default function CategoryForm({ categoryToEdit, onSuccess, onCancel }: Ca
         Description: '',
         IsActive: true,
         CreatedAt: new Date().toISOString(),
+        CreatedBy: user?.id || 0,
+        ModifiyBy: 0,
+        ModifiyAt: new Date().toISOString(),
       });
       
       if (onSuccess) onSuccess();
     } catch (err: any) {
       console.error('Error submitting category:', err);
-      const errorMessage = err?.response?.data?.message || err.message || 'Operation failed';
+      console.error('Error response:', err?.response?.data);
+      const errorMessage = err?.response?.data?.errors 
+        ? Object.values(err.response.data.errors).flat().join(', ')
+        : err?.response?.data?.message || err.message || 'Operation failed';
       setError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -96,7 +120,7 @@ export default function CategoryForm({ categoryToEdit, onSuccess, onCancel }: Ca
       padding: '20px', 
       backgroundColor: '#f5f5f5',
       borderRadius: '8px',
-      // maxWidth: '600px'
+      maxWidth: '700px'
     }}>
       <h2>{categoryToEdit ? 'Edit Category' : 'Create New Category'}</h2>
 
@@ -113,48 +137,50 @@ export default function CategoryForm({ categoryToEdit, onSuccess, onCancel }: Ca
       )}
 
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="CategoryId" style={labelStyle}>
-            Category ID *
-          </label>
-          <input
-            type="number"
-            id="CategoryId"
-            name="CategoryId"
-            value={formData.CategoryId}
-            onChange={handleChange}
-            required
-            disabled={!!categoryToEdit}
-            style={{
-              ...inputStyle,
-              backgroundColor: categoryToEdit ? '#e0e0e0' : 'white',
-            }}
-            placeholder="e.g., 1"
-          />
-          {categoryToEdit && (
-            <small style={{ color: '#666', fontSize: '12px' }}>
-              ID cannot be changed when editing
-            </small>
-          )}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '15px' }}>
+          <div>
+            <label htmlFor="CategoryId" style={labelStyle}>
+              Category ID *
+            </label>
+            <input
+              type="number"
+              id="CategoryId"
+              name="CategoryId"
+              value={formData.CategoryId}
+              onChange={handleChange}
+              required
+              disabled={!!categoryToEdit}
+              style={{
+                ...inputStyle,
+                backgroundColor: categoryToEdit ? '#e0e0e0' : 'white',
+              }}
+              placeholder="e.g., 1"
+            />
+            {categoryToEdit && (
+              <small style={{ color: '#666', fontSize: '12px' }}>
+                ID cannot be changed
+              </small>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="CategoryName" style={labelStyle}>
+              Category Name *
+            </label>
+            <input
+              type="text"
+              id="CategoryName"
+              name="CategoryName"
+              value={formData.CategoryName}
+              onChange={handleChange}
+              required
+              style={inputStyle}
+              placeholder="e.g., Electronics, Clothing, Food"
+            />
+          </div>
         </div>
 
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="CategoryName" style={labelStyle}>
-            Category Name *
-          </label>
-          <input
-            type="text"
-            id="CategoryName"
-            name="CategoryName"
-            value={formData.CategoryName}
-            onChange={handleChange}
-            required
-            style={inputStyle}
-            placeholder="e.g., Electronics, Clothing, Food"
-          />
-        </div>
-
-        <div style={{ marginBottom: '15px' }}>
+        <div style={{ marginTop: '15px' }}>
           <label htmlFor="Description" style={labelStyle}>
             Description
           </label>
@@ -172,7 +198,7 @@ export default function CategoryForm({ categoryToEdit, onSuccess, onCancel }: Ca
           />
         </div>
 
-        <div style={{ marginBottom: '20px' }}>
+        <div style={{ marginTop: '15px', marginBottom: '15px' }}>
           <label style={{ 
             display: 'flex', 
             alignItems: 'center',
@@ -212,6 +238,7 @@ export default function CategoryForm({ categoryToEdit, onSuccess, onCancel }: Ca
               borderRadius: '4px',
               cursor: submitting ? 'not-allowed' : 'pointer',
               opacity: submitting ? 0.6 : 1,
+              fontWeight: 'bold',
             }}
           >
             {submitting ? 'Saving...' : (categoryToEdit ? 'Update Category' : 'Create Category')}
@@ -231,6 +258,7 @@ export default function CategoryForm({ categoryToEdit, onSuccess, onCancel }: Ca
                 border: 'none',
                 borderRadius: '4px',
                 cursor: 'pointer',
+                fontWeight: 'bold',
               }}
             >
               Cancel

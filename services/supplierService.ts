@@ -1,3 +1,4 @@
+// services/supplierService.ts
 // All Supplier API operations
 import axiosInstance from '@/lib/axios/axiosInstance';
 import { Supplier, CreateSupplierRequest, UpdateSupplierRequest } from '@/types/supplier.types';
@@ -10,7 +11,8 @@ export const supplierService = {
     return response.data;
   },
 
-  // GET: Fetch single supplier by ID (if endpoint exists)
+  // GET: Fetch single supplier by ID
+  // Endpoint: GET /api/Suppliers/{supplierId}
   getSupplierById: async (supplierId: number): Promise<Supplier> => {
     const response = await axiosInstance.get<Supplier>(`/Suppliers/${supplierId}`);
     return response.data;
@@ -19,14 +21,46 @@ export const supplierService = {
   // POST: Create new supplier
   // Endpoint: POST /api/Suppliers
   createSupplier: async (supplierData: CreateSupplierRequest): Promise<Supplier> => {
-    const response = await axiosInstance.post<Supplier>('/Suppliers', supplierData);
+    // Convert PascalCase to camelCase for API
+    const payload = {
+      supplierId: supplierData.SupplierId,
+      supplierName: supplierData.SupplierName,
+      contact: supplierData.Contact,
+      email: supplierData.Email,
+      address: supplierData.Address,
+      gstNumber: supplierData.GSTNumber,
+      isActive: supplierData.IsActive,
+      createdBy: supplierData.CreatedBy,
+      createdAt: supplierData.CreatedAt || new Date().toISOString(),
+      modifiyBy: supplierData.ModifiyBy || 0,
+      modifiyAt: new Date().toISOString()
+    };
+    
+    console.log('Service sending payload:', JSON.stringify(payload, null, 2));
+    const response = await axiosInstance.post<Supplier>('/Suppliers', payload);
     return response.data;
   },
 
   // PUT: Update supplier
   // Endpoint: PUT /api/Suppliers/{id}
   updateSupplier: async (id: number, supplierData: UpdateSupplierRequest): Promise<Supplier> => {
-    const response = await axiosInstance.put<Supplier>(`/Suppliers/${id}`, supplierData);
+    // Convert PascalCase to camelCase for API
+    const payload = {
+      supplierId: supplierData.SupplierId,
+      supplierName: supplierData.SupplierName,
+      contact: supplierData.Contact,
+      email: supplierData.Email,
+      address: supplierData.Address,
+      gstNumber: supplierData.GSTNumber,
+      isActive: supplierData.IsActive,
+      createdBy: supplierData.CreatedBy,
+      createdAt: supplierData.CreatedAt,
+      modifiyBy: supplierData.ModifiyBy,
+      modifiyAt: new Date().toISOString()
+    };
+    
+    console.log('Service sending payload:', JSON.stringify(payload, null, 2));
+    const response = await axiosInstance.put<Supplier>(`/Suppliers/${id}`, payload);
     return response.data;
   },
 

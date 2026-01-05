@@ -1,33 +1,45 @@
-// All Role API operations matching your Swagger documentation
+// services/roleService.ts
 import axiosInstance from '@/lib/axios/axiosInstance';
 import { Role, CreateRoleRequest, UpdateRoleRequest } from '@/types/role.types';
 
 export const roleService = {
-  // GET: Fetch all roles
-  // Endpoint: GET /api/Roles
+  // GET all roles
   getAllRoles: async (): Promise<Role[]> => {
     const response = await axiosInstance.get<Role[]>('/Roles');
     return response.data;
   },
 
-  // POST: Create new role
-  // Endpoint: POST /api/Roles
-  // Body: { RoleId: number, RoleName: string }
+  // CREATE role
   createRole: async (roleData: CreateRoleRequest): Promise<Role> => {
-    const response = await axiosInstance.post<Role>('/Roles', roleData);
+    const payload = {
+      rolId: roleData.RoleId,
+      roleName: roleData.RoleName,
+      createdBy: roleData.CreatedBy,
+      createdAt: roleData.CreatedAt ?? new Date().toISOString(),
+      modifiyBy: 0,
+      modifiyAt: null,
+    };
+
+    const response = await axiosInstance.post<Role>('/Roles', payload);
     return response.data;
   },
 
-  // PUT: Update role
-  // Endpoint: PUT /api/Roles/{id}
-  // Body: { RoleId: number, RoleName: string }
+  // UPDATE role
   updateRole: async (id: number, roleData: UpdateRoleRequest): Promise<Role> => {
-    const response = await axiosInstance.put<Role>(`/Roles/${id}`, roleData);
+    const payload = {
+      rolId: roleData.RoleId,
+      roleName: roleData.RoleName,
+      createdBy: roleData.CreatedBy,
+      createdAt: roleData.CreatedAt,
+      modifiyBy: roleData.ModifiyBy,
+      modifiyAt: roleData.ModifiyAt ?? new Date().toISOString(),
+    };
+
+    const response = await axiosInstance.put<Role>(`/Roles/${id}`, payload);
     return response.data;
   },
 
-  // DELETE: Delete role
-  // Endpoint: DELETE /api/Roles/{id}
+  // DELETE role
   deleteRole: async (id: number): Promise<void> => {
     await axiosInstance.delete(`/Roles/${id}`);
   },

@@ -6,6 +6,7 @@ import { userRoleService } from '@/services/userRoleService';
 import { CreateUserRoleRequest, UserRole } from '@/types/userRole.types';
 import { useUsers } from '@/hooks/useUsers';
 import { useRoles } from '@/hooks/useRoles';
+import { useAuth } from '@/context/AuthContext';
 
 interface UserRoleFormProps {
   userRoleToEdit?: UserRole | null;
@@ -16,11 +17,16 @@ interface UserRoleFormProps {
 export default function UserRoleForm({ userRoleToEdit, onSuccess, onCancel }: UserRoleFormProps) {
   const { users, loading: usersLoading } = useUsers();
   const { roles, loading: rolesLoading } = useRoles();
+  const { user } = useAuth(); // Get current user for audit fields
   
   const [formData, setFormData] = useState<CreateUserRoleRequest>({
     UserRoleId: 0,
     UserId: 0,
     RoleId: 0,
+    CreatedBy: user?.username || 'system',
+    CreatedAt: new Date().toISOString(),
+    ModifiyBy: '',
+    ModifiyAt: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -32,15 +38,23 @@ export default function UserRoleForm({ userRoleToEdit, onSuccess, onCancel }: Us
         UserRoleId: userRoleToEdit.UserRoleId,
         UserId: userRoleToEdit.UserId,
         RoleId: userRoleToEdit.RoleId,
+        CreatedBy: userRoleToEdit.CreatedBy,
+        CreatedAt: userRoleToEdit.CreatedAt,
+        ModifiyBy: user?.username || 'system',
+        ModifiyAt: new Date().toISOString(),
       });
     } else {
       setFormData({
         UserRoleId: 0,
         UserId: 0,
         RoleId: 0,
+        CreatedBy: user?.username || 'system',
+        CreatedAt: new Date().toISOString(),
+        ModifiyBy: '',
+        ModifiyAt: '',
       });
     }
-  }, [userRoleToEdit]);
+  }, [userRoleToEdit, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +80,15 @@ export default function UserRoleForm({ userRoleToEdit, onSuccess, onCancel }: Us
         alert('User role created successfully!');
       }
 
-      setFormData({ UserRoleId: 0, UserId: 0, RoleId: 0 });
+      setFormData({
+        UserRoleId: 0,
+        UserId: 0,
+        RoleId: 0,
+        CreatedBy: user?.username || 'system',
+        CreatedAt: new Date().toISOString(),
+        ModifiyBy: '',
+        ModifiyAt: '',
+      });
       
       if (onSuccess) onSuccess();
     } catch (err: any) {
@@ -101,7 +123,7 @@ export default function UserRoleForm({ userRoleToEdit, onSuccess, onCancel }: Us
       padding: '20px', 
       backgroundColor: '#f5f5f5',
       borderRadius: '8px',
-      // maxWidth: '600px'
+      maxWidth: '700px'
     }}>
       <h2>{userRoleToEdit ? 'Edit User Role Assignment' : 'Create New User Role Assignment'}</h2>
 

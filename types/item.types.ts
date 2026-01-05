@@ -1,4 +1,4 @@
-// Define Item types based on your database structure
+// Define Item types based on your UPDATED database structure
 
 export interface Item {
   ItemId: number;
@@ -12,35 +12,48 @@ export interface Item {
   ReorderLevel: number;
   IsActive: boolean;
   CreatedAt: string;
+  CreatedBy: number;  // UserId (number)
+  ModifiyBy: number;  // UserId (number)
+  ModifiyAt: string;
   // Optional: Include related data if API returns them
   CategoryName?: string;
   UnitName?: string;
 }
 
 export interface CreateItemRequest {
-  ItemId: number;
-  ItemName: string;
-  CategoryId: number;
-  UnitId: number;
-  SKU: string;
-  Barcode: string;
-  Description: string;
-  UnitPrice: number;
-  ReorderLevel: number;
-  IsActive: boolean;
-  CreatedAt?: string;
+  // item: {  // API expects nested "item" object
+    ItemId: number;
+    ItemName: string;
+    CategoryId: number;
+    UnitId: number;
+    SKU: string;
+    Barcode: string;
+    Description: string;
+    UnitPrice: number;
+    ReorderLevel: number;
+    IsActive: boolean;
+    CreatedAt?: string;
+    CreatedBy: number;
+    ModifiyBy?: number;
+    ModifiyAt?: string;
+  // };
 }
 
 export interface UpdateItemRequest {
-  ItemId: number;
-  ItemName: string;
-  CategoryId: number;
-  UnitId: number;
-  SKU: string;
-  Barcode: string;
-  Description: string;
-  UnitPrice: number;
-  ReorderLevel: number;
-  IsActive: boolean;
-  CreatedAt?: string;
+  // item: {  // API expects nested "item" object
+    ItemId: number;
+    ItemName: string;
+    CategoryId: number;
+    UnitId: number;
+    SKU: string;
+    Barcode: string;
+    Description: string;
+    UnitPrice: number;
+    ReorderLevel: number;
+    IsActive: boolean;
+    CreatedAt?: string;
+    CreatedBy?: number;
+    ModifiyBy: number;
+    ModifiyAt?: string;
+  // };
 }

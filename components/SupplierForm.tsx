@@ -1,9 +1,10 @@
-// Component to create or update suppliers
+// components/SupplierForm.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { supplierService } from '@/services/supplierService';
-import { CreateSupplierRequest, Supplier } from '@/types/supplier.types';
+import { Supplier } from '@/types/supplier.types';
+import { useAuth } from '@/context/AuthContext';
 
 interface SupplierFormProps {
   supplierToEdit?: Supplier | null;
@@ -12,7 +13,9 @@ interface SupplierFormProps {
 }
 
 export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: SupplierFormProps) {
-  const [formData, setFormData] = useState<CreateSupplierRequest>({
+  const { user } = useAuth();
+  
+  const [formData, setFormData] = useState({
     SupplierId: 0,
     SupplierName: '',
     Contact: '',
@@ -20,6 +23,10 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
     Address: '',
     GSTNumber: '',
     IsActive: true,
+    CreatedBy: user?.id || 0,
+    CreatedAt: new Date().toISOString(),
+    ModifiyBy: 0,
+    ModifiyAt: new Date().toISOString(),
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -35,6 +42,10 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
         Address: supplierToEdit.Address,
         GSTNumber: supplierToEdit.GSTNumber,
         IsActive: supplierToEdit.IsActive,
+        CreatedBy: supplierToEdit.CreatedBy,
+        CreatedAt: supplierToEdit.CreatedAt,
+        ModifiyBy: user?.id || 0,
+        ModifiyAt: new Date().toISOString(),
       });
     } else {
       setFormData({
@@ -45,25 +56,35 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
         Address: '',
         GSTNumber: '',
         IsActive: true,
+        CreatedBy: user?.id || 0,
+        CreatedAt: new Date().toISOString(),
+        ModifiyBy: 0,
+        ModifiyAt: new Date().toISOString(),
       });
     }
-  }, [supplierToEdit]);
+  }, [supplierToEdit, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSubmitting(true);
 
-    console.log('Submitting form data:', formData);
+    console.log('Submitting supplier data:', formData);
 
     try {
       if (supplierToEdit) {
         console.log('Updating supplier with ID:', supplierToEdit.SupplierId);
-        await supplierService.updateSupplier(supplierToEdit.SupplierId, formData);
+        await supplierService.updateSupplier(supplierToEdit.SupplierId, {
+          ...formData,
+          ModifiyAt: new Date().toISOString()
+        });
         alert('Supplier updated successfully!');
       } else {
         console.log('Creating new supplier');
-        await supplierService.createSupplier(formData);
+        await supplierService.createSupplier({
+          ...formData,
+          ModifiyAt: new Date().toISOString()
+        });
         alert('Supplier created successfully!');
       }
 
@@ -75,12 +96,19 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
         Address: '',
         GSTNumber: '',
         IsActive: true,
+        CreatedBy: user?.id || 0,
+        CreatedAt: new Date().toISOString(),
+        ModifiyBy: 0,
+        ModifiyAt: new Date().toISOString(),
       });
       
       if (onSuccess) onSuccess();
     } catch (err: any) {
       console.error('Error submitting supplier:', err);
-      const errorMessage = err?.response?.data?.message || err.message || 'Operation failed';
+      console.error('Error response:', err?.response?.data);
+      const errorMessage = err?.response?.data?.errors 
+        ? Object.values(err.response.data.errors).flat().join(', ')
+        : err?.response?.data?.message || err.message || 'Operation failed';
       setError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -104,7 +132,7 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
       padding: '20px', 
       backgroundColor: '#f5f5f5',
       borderRadius: '8px',
-      // maxWidth: '800px'
+      maxWidth: '900px'
     }}>
       <h2>{supplierToEdit ? 'Edit Supplier' : 'Create New Supplier'}</h2>
 
@@ -121,7 +149,7 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
       )}
 
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '15px' }}>
           <div>
             <label htmlFor="SupplierId" style={labelStyle}>
               Supplier ID *
@@ -195,7 +223,7 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
             />
           </div>
 
-          <div>
+          <div style={{ gridColumn: 'span 2' }}>
             <label htmlFor="GSTNumber" style={labelStyle}>
               GST Number *
             </label>
@@ -213,36 +241,9 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
               15-digit GST identification number
             </small>
           </div>
-
-          <div>
-            <label style={labelStyle}>Status</label>
-            <label style={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              cursor: 'pointer',
-              padding: '10px',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              backgroundColor: 'white'
-            }}>
-              <input
-                type="checkbox"
-                name="IsActive"
-                checked={formData.IsActive}
-                onChange={handleChange}
-                style={{
-                  marginRight: '10px',
-                  width: '20px',
-                  height: '20px',
-                  cursor: 'pointer',
-                }}
-              />
-              <span style={{ fontWeight: 'bold' }}>Is Active</span>
-            </label>
-          </div>
         </div>
 
-        <div style={{ marginTop: '15px', marginBottom: '20px' }}>
+        <div style={{ marginTop: '15px', marginBottom: '15px' }}>
           <label htmlFor="Address" style={labelStyle}>
             Address *
           </label>
@@ -261,6 +262,32 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
           />
         </div>
 
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}>
+            <input
+              type="checkbox"
+              name="IsActive"
+              checked={formData.IsActive}
+              onChange={handleChange}
+              style={{
+                marginRight: '10px',
+                width: '20px',
+                height: '20px',
+                cursor: 'pointer',
+              }}
+            />
+            Is Active
+          </label>
+          <small style={{ color: '#666', fontSize: '12px', marginLeft: '30px' }}>
+            Active suppliers can be used in purchase orders
+          </small>
+        </div>
+
         <div style={{ display: 'flex', gap: '10px' }}>
           <button
             type="submit"
@@ -275,6 +302,7 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
               borderRadius: '4px',
               cursor: submitting ? 'not-allowed' : 'pointer',
               opacity: submitting ? 0.6 : 1,
+              fontWeight: 'bold',
             }}
           >
             {submitting ? 'Saving...' : (supplierToEdit ? 'Update Supplier' : 'Create Supplier')}
@@ -294,6 +322,7 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
                 border: 'none',
                 borderRadius: '4px',
                 cursor: 'pointer',
+                fontWeight: 'bold',
               }}
             >
               Cancel

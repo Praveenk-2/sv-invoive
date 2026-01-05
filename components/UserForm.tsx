@@ -3,7 +3,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { userService } from '@/services/userService';
-import { CreateUserRequest, User } from '@/types/user.types';
+import { User } from '@/types/user.types';
+import { useAuth } from '@/context/AuthContext';
 
 interface UserFormProps {
   userToEdit?: User | null;
@@ -12,13 +13,18 @@ interface UserFormProps {
 }
 
 export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormProps) {
-  const [formData, setFormData] = useState<CreateUserRequest>({
+  const { user: currentUser } = useAuth();
+  
+  const [formData, setFormData] = useState({
     UserId: 0,
     Username: '',
     PasswordHash: '',
     Email: '',
     IsActive: true,
     CreatedAt: new Date().toISOString(),
+    CreatedBy: currentUser?.id || 0,
+    ModifiyBy: 0,
+    ModifiyAt: null as string | null,  // null instead of empty string
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -33,6 +39,9 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
         Email: userToEdit.Email,
         IsActive: userToEdit.IsActive,
         CreatedAt: userToEdit.CreatedAt,
+        CreatedBy: userToEdit.CreatedBy,
+        ModifiyBy: currentUser?.id || 0,
+        ModifiyAt: new Date().toISOString(),
       });
     } else {
       setFormData({
@@ -42,27 +51,37 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
         Email: '',
         IsActive: true,
         CreatedAt: new Date().toISOString(),
+        CreatedBy: currentUser?.id || 0,
+        ModifiyBy: 0,
+        ModifiyAt: null,  // null instead of empty string
       });
     }
-  }, [userToEdit]);
+  }, [userToEdit, currentUser]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSubmitting(true);
 
-    console.log('Submitting form data:', formData);
+    console.log('Form data before sending:', formData);
 
-    try {
-      if (userToEdit) {
-        console.log('Updating user with ID:', userToEdit.UserId);
-        await userService.updateUser(userToEdit.UserId, formData);
-        alert('User updated successfully!');
-      } else {
-        console.log('Creating new user');
-        await userService.createUser(formData);
-        alert('User created successfully!');
-      }
+    // In UserForm.tsx handleSubmit function
+try {
+  if (userToEdit) {
+    console.log('Updating user with ID:', userToEdit.UserId);
+    await userService.updateUser(userToEdit.UserId, {
+      ...formData,
+      ModifiyAt: new Date().toISOString() // Ensure it's a valid date string
+    });
+    alert('User updated successfully!');
+  } else {
+    console.log('Creating new user');
+    await userService.createUser({
+      ...formData,
+      ModifiyAt: new Date().toISOString() // Ensure it's a valid date string for create too
+    });
+    alert('User created successfully!');
+  }
 
       setFormData({
         UserId: 0,
@@ -71,12 +90,18 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
         Email: '',
         IsActive: true,
         CreatedAt: new Date().toISOString(),
+        CreatedBy: currentUser?.id || 0,
+        ModifiyBy: 0,
+        ModifiyAt: null,
       });
       
       if (onSuccess) onSuccess();
     } catch (err: any) {
       console.error('Error submitting user:', err);
-      const errorMessage = err?.response?.data?.message || err.message || 'Operation failed';
+      console.error('Error response:', err?.response?.data);
+      const errorMessage = err?.response?.data?.errors 
+        ? Object.values(err.response.data.errors).flat().join(', ')
+        : err?.response?.data?.message || err.message || 'Operation failed';
       setError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -96,7 +121,7 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
       padding: '20px', 
       backgroundColor: '#f5f5f5',
       borderRadius: '8px',
-      // maxWidth: '600px'
+      maxWidth: '700px'
     }}>
       <h2>{userToEdit ? 'Edit User' : 'Create New User'}</h2>
 
@@ -115,11 +140,7 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
       <form onSubmit={handleSubmit}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
           <div>
-            <label htmlFor="UserId" style={{ 
-              display: 'block', 
-              marginBottom: '5px', 
-              fontWeight: 'bold' 
-            }}>
+            <label htmlFor="UserId" style={labelStyle}>
               User ID *
             </label>
             <input
@@ -131,11 +152,7 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
               required
               disabled={!!userToEdit}
               style={{
-                width: '100%',
-                padding: '10px',
-                fontSize: '16px',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
+                ...inputStyle,
                 backgroundColor: userToEdit ? '#e0e0e0' : 'white',
               }}
               placeholder="e.g., 1"
@@ -148,11 +165,7 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
           </div>
 
           <div>
-            <label htmlFor="Username" style={{ 
-              display: 'block', 
-              marginBottom: '5px', 
-              fontWeight: 'bold' 
-            }}>
+            <label htmlFor="Username" style={labelStyle}>
               Username *
             </label>
             <input
@@ -162,23 +175,13 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
               value={formData.Username}
               onChange={handleChange}
               required
-              style={{
-                width: '100%',
-                padding: '10px',
-                fontSize: '16px',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-              }}
+              style={inputStyle}
               placeholder="e.g., john_doe"
             />
           </div>
 
           <div>
-            <label htmlFor="Email" style={{ 
-              display: 'block', 
-              marginBottom: '5px', 
-              fontWeight: 'bold' 
-            }}>
+            <label htmlFor="Email" style={labelStyle}>
               Email *
             </label>
             <input
@@ -188,24 +191,14 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
               value={formData.Email}
               onChange={handleChange}
               required
-              style={{
-                width: '100%',
-                padding: '10px',
-                fontSize: '16px',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-              }}
+              style={inputStyle}
               placeholder="user@example.com"
             />
           </div>
 
           <div>
-            <label htmlFor="PasswordHash" style={{ 
-              display: 'block', 
-              marginBottom: '5px', 
-              fontWeight: 'bold' 
-            }}>
-              Password {userToEdit ? '(optional)' : '*'}
+            <label htmlFor="PasswordHash" style={labelStyle}>
+              Password {userToEdit ? '(leave blank to keep)' : '*'}
             </label>
             <input
               type="password"
@@ -214,19 +207,16 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
               value={formData.PasswordHash}
               onChange={handleChange}
               required={!userToEdit}
-              style={{
-                width: '100%',
-                padding: '10px',
-                fontSize: '16px',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-              }}
+              style={inputStyle}
               placeholder="Enter password"
             />
+            <small style={{ color: '#666', fontSize: '12px' }}>
+              {userToEdit ? 'Only fill to change password' : 'Min 6 characters'}
+            </small>
           </div>
         </div>
 
-        <div style={{ marginTop: '15px', marginBottom: '20px' }}>
+        <div style={{ marginTop: '15px', marginBottom: '15px' }}>
           <label style={{ 
             display: 'flex', 
             alignItems: 'center',
@@ -266,6 +256,7 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
               borderRadius: '4px',
               cursor: submitting ? 'not-allowed' : 'pointer',
               opacity: submitting ? 0.6 : 1,
+              fontWeight: 'bold',
             }}
           >
             {submitting ? 'Saving...' : (userToEdit ? 'Update User' : 'Create User')}
@@ -285,6 +276,7 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
                 border: 'none',
                 borderRadius: '4px',
                 cursor: 'pointer',
+                fontWeight: 'bold',
               }}
             >
               Cancel
@@ -295,3 +287,17 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
     </div>
   );
 }
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  marginBottom: '5px',
+  fontWeight: 'bold',
+};
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '10px',
+  fontSize: '16px',
+  border: '1px solid #ccc',
+  borderRadius: '4px',
+};

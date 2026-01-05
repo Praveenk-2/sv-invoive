@@ -1,10 +1,10 @@
-// components/RoleForm.tsx
 // Component to create or update roles
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { roleService } from '@/services/roleService';
 import { CreateRoleRequest, Role } from '@/types/role.types';
+import { useAuth } from '@/context/AuthContext';
 
 interface RoleFormProps {
   roleToEdit?: Role | null;
@@ -13,52 +13,76 @@ interface RoleFormProps {
 }
 
 export default function RoleForm({ roleToEdit, onSuccess, onCancel }: RoleFormProps) {
-  const [formData, setFormData] = useState<CreateRoleRequest>({
-    RoleId: 0,
-    RoleName: '',
-  });
+  const { user } = useAuth();
+  
+  const [formData, setFormData] = useState({
+  RoleId: 0,
+  RoleName: '',
+  CreatedBy: user?.id || 0,
+  CreatedAt: new Date().toISOString(),
+  ModifiyBy: 0,
+  ModifiyAt: undefined as string | undefined,
+});
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  // Populate form if editing
   useEffect(() => {
+  if (roleToEdit) {
+    setFormData({
+      RoleId: roleToEdit.RoleId,
+      RoleName: roleToEdit.RoleName,
+      CreatedBy: roleToEdit.CreatedBy,
+      CreatedAt: roleToEdit.CreatedAt,
+      ModifiyBy: user?.id || 0,
+      ModifiyAt: new Date().toISOString(),
+    });
+  } else {
+    setFormData({
+      RoleId: 0,
+      RoleName: '',
+      CreatedBy: user?.id || 0,
+      CreatedAt: new Date().toISOString(),
+      ModifiyBy: 0,
+      ModifiyAt: undefined,
+    });
+  }
+}, [roleToEdit, user]);
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError('');
+  setSubmitting(true);
+
+  try {
     if (roleToEdit) {
-      setFormData({
-        RoleId: roleToEdit.RoleId,
-        RoleName: roleToEdit.RoleName,
+      await roleService.updateRole(roleToEdit.RoleId, {
+        ...formData,
+        ModifiyBy: user?.id || 0,
+        ModifiyAt: new Date().toISOString(),
       });
+      alert('Role updated successfully!');
+    } else {
+      await roleService.createRole({
+        ...formData,
+        ModifiyAt: undefined,
+      });
+      alert('Role created successfully!');
     }
-  }, [roleToEdit]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSubmitting(true);
+    if (onSuccess) onSuccess();
+  } catch (err: any) {
+    const errorMessage =
+      err?.response?.data?.message ||
+      err?.response?.data ||
+      err.message ||
+      'Operation failed';
+    setError(errorMessage);
+  } finally {
+    setSubmitting(false);
+  }
+};
 
-    try {
-      if (roleToEdit) {
-        // Update existing role using PUT /api/Roles/{id}
-        await roleService.updateRole(roleToEdit.RoleId, formData);
-        alert('Role updated successfully!');
-      } else {
-        // Create new role using POST /api/Roles
-        await roleService.createRole(formData);
-        alert('Role created successfully!');
-      }
-
-      // Reset form
-      setFormData({ RoleId: 0, RoleName: '' });
-      
-      // Call success callback
-      if (onSuccess) onSuccess();
-    } catch (err: any) {
-      const errorMessage = err?.response?.data?.message || err.message || 'Operation failed';
-      setError(errorMessage);
-      console.error('Error submitting role:', err);
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -73,7 +97,7 @@ export default function RoleForm({ roleToEdit, onSuccess, onCancel }: RoleFormPr
       padding: '20px', 
       backgroundColor: '#f5f5f5',
       borderRadius: '8px',
-      // maxWidth: '500px'
+      maxWidth: '600px'
     }}>
       <h2>{roleToEdit ? 'Edit Role' : 'Create New Role'}</h2>
 
@@ -91,11 +115,7 @@ export default function RoleForm({ roleToEdit, onSuccess, onCancel }: RoleFormPr
 
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="RoleId" style={{ 
-            display: 'block', 
-            marginBottom: '5px', 
-            fontWeight: 'bold' 
-          }}>
+          <label htmlFor="RoleId" style={labelStyle}>
             Role ID *
           </label>
           <input
@@ -105,25 +125,22 @@ export default function RoleForm({ roleToEdit, onSuccess, onCancel }: RoleFormPr
             value={formData.RoleId}
             onChange={handleChange}
             required
-            disabled={!!roleToEdit} // Disable ID field when editing
+            disabled={!!roleToEdit}
             style={{
-              width: '100%',
-              padding: '10px',
-              fontSize: '16px',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
+              ...inputStyle,
               backgroundColor: roleToEdit ? '#e0e0e0' : 'white',
             }}
             placeholder="e.g., 1, 2, 3"
           />
+          {roleToEdit && (
+            <small style={{ color: '#666', fontSize: '12px' }}>
+              ID cannot be changed when editing
+            </small>
+          )}
         </div>
 
         <div style={{ marginBottom: '20px' }}>
-          <label htmlFor="RoleName" style={{ 
-            display: 'block', 
-            marginBottom: '5px', 
-            fontWeight: 'bold' 
-          }}>
+          <label htmlFor="RoleName" style={labelStyle}>
             Role Name *
           </label>
           <input
@@ -133,14 +150,8 @@ export default function RoleForm({ roleToEdit, onSuccess, onCancel }: RoleFormPr
             value={formData.RoleName}
             onChange={handleChange}
             required
-            style={{
-              width: '100%',
-              padding: '10px',
-              fontSize: '16px',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-            }}
-            placeholder="e.g., Administrator, Manager"
+            style={inputStyle}
+            placeholder="e.g., Administrator, Manager, Employee"
           />
         </div>
 
@@ -158,6 +169,7 @@ export default function RoleForm({ roleToEdit, onSuccess, onCancel }: RoleFormPr
               borderRadius: '4px',
               cursor: submitting ? 'not-allowed' : 'pointer',
               opacity: submitting ? 0.6 : 1,
+              fontWeight: 'bold',
             }}
           >
             {submitting ? 'Saving...' : (roleToEdit ? 'Update Role' : 'Create Role')}
@@ -177,6 +189,7 @@ export default function RoleForm({ roleToEdit, onSuccess, onCancel }: RoleFormPr
                 border: 'none',
                 borderRadius: '4px',
                 cursor: 'pointer',
+                fontWeight: 'bold',
               }}
             >
               Cancel
@@ -187,3 +200,17 @@ export default function RoleForm({ roleToEdit, onSuccess, onCancel }: RoleFormPr
     </div>
   );
 }
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  marginBottom: '5px',
+  fontWeight: 'bold',
+};
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '10px',
+  fontSize: '16px',
+  border: '1px solid #ccc',
+  borderRadius: '4px',
+};
