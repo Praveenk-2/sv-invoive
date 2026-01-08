@@ -63,7 +63,7 @@ export default function UserRoleList({ onEdit }: UserRoleListProps) {
   }
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div >
       <h2>All User Role Assignments ({userRoles.length})</h2>
       
       {userRoles.length === 0 ? (

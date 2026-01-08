@@ -1,31 +1,29 @@
-// Component to display list of suppliers
 'use client';
 
-import React, { useState } from 'react';
-import { useSuppliers } from '@/hooks/useSuppliers';
-import { supplierService } from '@/services/supplierService';
-import { Supplier } from '@/types/supplier.types';
+import React from 'react';
+import { usePurchaseOrderItems } from '@/hooks/usePurchaseOrderItems';
+import { purchaseOrderItemsService } from '@/services/purchaseOrderItemsService';
+import { PurchaseOrderItem } from '@/types/purchaseOrderItems.types';
 
-interface SupplierListProps {
-  onEdit?: (supplier: Supplier) => void;
+interface PurchaseOrderItemsListProps {
+  onEdit?: (item: PurchaseOrderItem) => void;
 }
 
-export default function SupplierList({ onEdit }: SupplierListProps) {
-  const { suppliers, loading, error, refetch } = useSuppliers();
-  const [searchTerm, setSearchTerm] = useState('');
+export default function PurchaseOrderItemsList({ onEdit }: PurchaseOrderItemsListProps) {
+  const { purchaseOrderItems, loading, error, refetch } = usePurchaseOrderItems();
 
   const handleDelete = async (id: number) => {
-    console.log('Deleting supplier with ID:', id);
+    console.log('Deleting purchase order item with ID:', id);
     
-    if (!confirm('Are you sure you want to delete this supplier?')) return;
+    if (!confirm('Are you sure you want to delete this purchase order item?')) return;
 
     try {
-      await supplierService.deleteSupplier(id);
-      alert('Supplier deleted successfully!');
+      await purchaseOrderItemsService.deletePurchaseOrderItem(id);
+      alert('Purchase order item deleted successfully!');
       refetch();
     } catch (err: any) {
-      console.error('Error deleting supplier:', err);
-      const errorMsg = err?.response?.data?.message || err.message || 'Failed to delete supplier';
+      console.error('Error deleting purchase order item:', err);
+      const errorMsg = err?.response?.data?.message || err.message || 'Failed to delete purchase order item';
       alert(errorMsg);
     }
   };
@@ -46,18 +44,17 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
     return `User #${userId}`;
   };
 
-  // Filter suppliers based on search
-  const filteredSuppliers = suppliers.filter(supplier =>
-    supplier.SupplierName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supplier.Email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supplier.Contact.includes(searchTerm) ||
-    supplier.GSTNumber.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
+  };
 
   if (loading) {
     return (
       <div style={{ padding: '20px', textAlign: 'center' }}>
-        Loading suppliers...
+        Loading purchase order items...
       </div>
     );
   }
@@ -76,6 +73,8 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
     );
   }
 
+  const grandTotal = purchaseOrderItems.reduce((sum, item) => sum + item.Total, 0);
+
   return (
     <div >
       <div style={{ 
@@ -84,26 +83,23 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
         alignItems: 'center',
         marginBottom: '20px'
       }}>
-        <h2>All Suppliers ({filteredSuppliers.length})</h2>
-        
-        <input
-          type="text"
-          placeholder="Search by name, email, contact, or GST..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{
-            padding: '10px',
-            fontSize: '14px',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            width: '350px',
-          }}
-        />
+        <h2>All Purchase Order Items ({purchaseOrderItems.length})</h2>
+        <div style={{
+          padding: '15px 25px',
+          backgroundColor: '#1976d2',
+          borderRadius: '8px',
+          color: 'white'
+        }}>
+          <div style={{ fontSize: '12px', marginBottom: '5px' }}>Grand Total</div>
+          <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+            {formatCurrency(grandTotal)}
+          </div>
+        </div>
       </div>
       
-      {filteredSuppliers.length === 0 ? (
+      {purchaseOrderItems.length === 0 ? (
         <p style={{ color: '#666', fontStyle: 'italic' }}>
-          {searchTerm ? 'No suppliers found matching your search.' : 'No suppliers found. Add your first supplier!'}
+          No purchase order items found. Create your first purchase order item!
         </p>
       ) : (
         <div style={{ overflowX: 'auto' }} className='scroll-bar'>
@@ -116,74 +112,24 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
           }}>
             <thead>
               <tr style={{ backgroundColor: '#1976d2', color: 'white' }}>
-                <th style={tableHeaderStyle}>ID</th>
-                <th style={tableHeaderStyle}>Supplier Name</th>
-                <th style={tableHeaderStyle}>Contact</th>
-                <th style={tableHeaderStyle}>Email</th>
-                <th style={tableHeaderStyle}>GST Number</th>
-                <th style={tableHeaderStyle}>Status</th>
-                <th style={tableHeaderStyle}>Created At</th>
+                <th style={tableHeaderStyle}>Item ID</th>
+                <th style={tableHeaderStyle}>PO ID</th>
+                <th style={tableHeaderStyle}>Item ID</th>
+                <th style={tableHeaderStyle}>Quantity</th>
+                <th style={tableHeaderStyle}>Unit Price</th>
+                <th style={tableHeaderStyle}>Total</th>
                 <th style={tableHeaderStyle}>Created By</th>
+                <th style={tableHeaderStyle}>Created At</th>
                 <th style={tableHeaderStyle}>Modified By</th>
                 <th style={tableHeaderStyle}>Modified At</th>
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredSuppliers.map((supplier) => (
-                <tr key={supplier.SupplierId} style={{ borderBottom: '1px solid #ddd' }}>
-                  <td style={tableCellStyle}>{supplier.SupplierId}</td>
+              {purchaseOrderItems.map((item) => (
+                <tr key={item.POItemId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>
-                    <strong style={{ color: '#1976d2' }}>{supplier.SupplierName}</strong>
-                    {supplier.Address && (
-                      <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>
-                        {supplier.Address.substring(0, 40)}
-                        {supplier.Address.length > 40 && '...'}
-                      </div>
-                    )}
-                  </td>
-                  <td style={tableCellStyle}>
-                    <a 
-                      href={`tel:${supplier.Contact}`}
-                      style={{ color: '#1976d2', textDecoration: 'none' }}
-                    >
-                      {supplier.Contact}
-                    </a>
-                  </td>
-                  <td style={tableCellStyle}>
-                    <a 
-                      href={`mailto:${supplier.Email}`}
-                      style={{ color: '#1976d2', textDecoration: 'none' }}
-                    >
-                      {supplier.Email}
-                    </a>
-                  </td>
-                  <td style={tableCellStyle}>
-                    <code style={{ 
-                      backgroundColor: '#f5f5f5', 
-                      padding: '4px 8px', 
-                      borderRadius: '4px',
-                      fontSize: '12px'
-                    }}>
-                      {supplier.GSTNumber}
-                    </code>
-                  </td>
-                  <td style={tableCellStyle}>
-                    <span style={{
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      fontSize: '12px',
-                      fontWeight: 'bold',
-                      backgroundColor: supplier.IsActive ? '#4caf50' : '#f44336',
-                      color: 'white',
-                    }}>
-                      {supplier.IsActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td style={tableCellStyle}>
-                    <span style={{ fontSize: '13px', color: '#666' }}>
-                      {formatDate(supplier.CreatedAt)}
-                    </span>
+                    <strong style={{ color: '#1976d2' }}>{item.POItemId}</strong>
                   </td>
                   <td style={tableCellStyle}>
                     <span style={{ 
@@ -192,7 +138,51 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
                       borderRadius: '4px',
                       fontSize: '12px'
                     }}>
-                      {getUserName(supplier.CreatedBy)}
+                      PO #{item.POId}
+                    </span>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <span style={{ 
+                      backgroundColor: '#f3e5f5', 
+                      padding: '4px 8px', 
+                      borderRadius: '4px',
+                      fontSize: '12px'
+                    }}>
+                      Item #{item.ItemId}
+                    </span>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <strong style={{ fontSize: '14px' }}>
+                      {item.Quantity.toLocaleString()}
+                    </strong>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <span style={{ color: '#2e7d32', fontWeight: 'bold' }}>
+                      {formatCurrency(item.UnitPrice)}
+                    </span>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <span style={{ 
+                      color: '#1565c0', 
+                      fontWeight: 'bold',
+                      fontSize: '16px'
+                    }}>
+                      {formatCurrency(item.Total)}
+                    </span>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <span style={{ 
+                      backgroundColor: '#e8f5e9', 
+                      padding: '4px 8px', 
+                      borderRadius: '4px',
+                      fontSize: '12px'
+                    }}>
+                      {getUserName(item.CreatedBy)}
+                    </span>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <span style={{ fontSize: '13px', color: '#666' }}>
+                      {formatDate(item.CreatedAt)}
                     </span>
                   </td>
                   <td style={tableCellStyle}>
@@ -202,12 +192,12 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
                       borderRadius: '4px',
                       fontSize: '12px'
                     }}>
-                      {getUserName(supplier.ModifiyBy)}
+                      {getUserName(item.ModifiyBy)}
                     </span>
                   </td>
                   <td style={tableCellStyle}>
                     <span style={{ fontSize: '13px', color: '#666' }}>
-                      {formatDate(supplier.ModifiyAt)}
+                      {formatDate(item.ModifiyAt)}
                     </span>
                   </td>
                   <td style={tableCellStyle}>
@@ -215,8 +205,8 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
                       {onEdit && (
                         <button
                           onClick={() => {
-                            console.log('Editing supplier:', supplier);
-                            onEdit(supplier);
+                            console.log('Editing purchase order item:', item);
+                            onEdit(item);
                           }}
                           style={{
                             padding: '6px 12px',
@@ -231,7 +221,7 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
                         </button>
                       )}
                       <button
-                        onClick={() => handleDelete(supplier.SupplierId)}
+                        onClick={() => handleDelete(item.POItemId)}
                         style={{
                           padding: '6px 12px',
                           backgroundColor: '#d32f2f',
@@ -248,6 +238,17 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
                 </tr>
               ))}
             </tbody>
+            <tfoot>
+              <tr style={{ backgroundColor: '#f5f5f5', fontWeight: 'bold' }}>
+                <td colSpan={5} style={{ ...tableCellStyle, textAlign: 'right', fontSize: '16px' }}>
+                  Grand Total:
+                </td>
+                <td style={{ ...tableCellStyle, fontSize: '18px', color: '#1565c0' }}>
+                  {formatCurrency(grandTotal)}
+                </td>
+                <td colSpan={5}></td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       )}

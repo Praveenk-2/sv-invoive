@@ -1,36 +1,35 @@
-// Complete UserRoles management page with all CRUD operations
 'use client';
 
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
-import UserRoleList from '@/components/UserRoleList';
-import UserRoleForm from '@/components/UserRoleForm';
-import { UserRole } from '@/types/userRole.types';
+import PurchaseOrdersList from '@/components/PurchaseOrdersList';
+import PurchaseOrdersForm from '@/components/PurchaseOrdersForm';
+import { PurchaseOrder } from '@/types/purchaseOrders.types';
 
-export default function UserRolesPage() {
+export default function PurchaseOrdersPage() {
   const [showForm, setShowForm] = useState(false);
-  const [editingUserRole, setEditingUserRole] = useState<UserRole | null>(null);
+  const [editingPO, setEditingPO] = useState<PurchaseOrder | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const handleEdit = (userRole: UserRole) => {
-    setEditingUserRole(userRole);
+  const handleEdit = (po: PurchaseOrder) => {
+    setEditingPO(po);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSuccess = () => {
     setShowForm(false);
-    setEditingUserRole(null);
+    setEditingPO(null);
     setRefreshKey(prev => prev + 1);
   };
 
   const handleCancel = () => {
     setShowForm(false);
-    setEditingUserRole(null);
+    setEditingPO(null);
   };
 
   const handleCreateNew = () => {
-    setEditingUserRole(null);
+    setEditingPO(null);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -47,12 +46,12 @@ export default function UserRolesPage() {
           borderBottom: '2px solid #1976d2'
         }}>
           <div>
-            <h1 style={{ margin: 0, color: '#1976d2' }}>🔐 User Role Management</h1>
+            <h1 style={{ margin: 0, color: '#1976d2' }}>Purchase Orders Management</h1>
             <p style={{ margin: '5px 0 0 0', color: '#666' }}>
-              Assign roles to users with full audit trail tracking
+              Manage purchase orders with supplier tracking and status monitoring
             </p>
           </div>
-          <button
+<button
             onClick={handleCreateNew}
             style={{
               padding: '12px 24px',
@@ -65,7 +64,7 @@ export default function UserRolesPage() {
               fontWeight: 'bold',
             }}
           >
-            + Assign Role to User
+            + Create New Order
           </button>
         </div>
 
@@ -78,16 +77,16 @@ export default function UserRolesPage() {
               >
                 ✕
               </button>
-            <UserRoleForm 
-              userRoleToEdit={editingUserRole}
+            <PurchaseOrdersForm 
+              poToEdit={editingPO}
               onSuccess={handleSuccess}
               onCancel={handleCancel}
             />
           </div>
-          </div>
+        </div>
         )}
 
-        <UserRoleList key={refreshKey} onEdit={handleEdit} />
+        <PurchaseOrdersList key={refreshKey} onEdit={handleEdit} />
       </div>
     </DashboardLayout>
   );

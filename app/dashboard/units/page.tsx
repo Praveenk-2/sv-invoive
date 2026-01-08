@@ -35,7 +35,7 @@ export default function UnitsPage() {
 
   return (
     <DashboardLayout>
-      <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 

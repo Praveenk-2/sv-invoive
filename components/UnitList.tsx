@@ -29,6 +29,22 @@ export default function UnitList({ onEdit }: UnitListProps) {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getUserName = (userId: number) => {
+    if (!userId) return '-';
+    return `User #${userId}`;
+  };
+
   if (loading) {
     return (
       <div style={{ padding: '20px', textAlign: 'center' }}>
@@ -52,7 +68,7 @@ export default function UnitList({ onEdit }: UnitListProps) {
   }
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div >
       <h2>All Units of Measurement ({units.length})</h2>
       
       {units.length === 0 ? (
@@ -72,6 +88,11 @@ export default function UnitList({ onEdit }: UnitListProps) {
                 <th style={tableHeaderStyle}>Unit ID</th>
                 <th style={tableHeaderStyle}>Unit Name</th>
                 <th style={tableHeaderStyle}>Abbreviation</th>
+                <th style={tableHeaderStyle}>Created By</th>
+                <th style={tableHeaderStyle}>Created At</th>
+                <th style={tableHeaderStyle}>Modified By</th>
+                <th style={tableHeaderStyle}>Modified At</th>
+
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
@@ -94,6 +115,18 @@ export default function UnitList({ onEdit }: UnitListProps) {
                     }}>
                       {unit.Abbreviation}
                     </span>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <strong>{formatDate(unit.CreatedAt)}</strong>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <strong>{getUserName(unit.CreatedBy)}</strong>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <strong>{unit.ModifiyBy}</strong>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <strong>{formatDate(unit.ModifiyAt)}</strong>
                   </td>
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>

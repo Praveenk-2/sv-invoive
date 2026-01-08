@@ -1,37 +1,55 @@
-// All Unit API operations
 import axiosInstance from '@/lib/axios/axiosInstance';
 import { Unit, CreateUnitRequest, UpdateUnitRequest } from '@/types/unit.types';
 
 export const unitService = {
-  // GET: Fetch all units
-  // Endpoint: GET /api/Units
+
+  // GET
   getAllUnits: async (): Promise<Unit[]> => {
-    const response = await axiosInstance.get<Unit[]>('/Units');
+    const response = await axiosInstance.get('/Units');
     return response.data;
   },
 
-  // GET: Fetch single unit by ID (if endpoint exists)
+  // GET BY ID
   getUnitById: async (unitId: number): Promise<Unit> => {
-    const response = await axiosInstance.get<Unit>(`/Units/${unitId}`);
+    const response = await axiosInstance.get(`/Units/${unitId}`);
     return response.data;
   },
 
-  // POST: Create new unit
-  // Endpoint: POST /api/Units
-  createUnit: async (unitData: CreateUnitRequest): Promise<Unit> => {
-    const response = await axiosInstance.post<Unit>('/Units', unitData);
+  // POST
+  createUnit: async (data: CreateUnitRequest): Promise<Unit> => {
+
+    const payload = {
+      unitId: data.UnitId,
+      unitName: data.UnitName,
+      abbreviation: data.Abbreviation,
+      createdBy: data.CreatedBy,
+      createdAt: data.CreatedAt ?? new Date().toISOString(),
+      modifiyBy: data.ModifiyBy ?? 0,
+      modifiyAt: data.ModifiyAt ?? new Date().toISOString(),
+    };
+
+    const response = await axiosInstance.post('/Units', payload);
     return response.data;
   },
 
-  // PUT: Update unit
-  // Endpoint: PUT /api/Units/{id}
-  updateUnit: async (id: number, unitData: UpdateUnitRequest): Promise<Unit> => {
-    const response = await axiosInstance.put<Unit>(`/Units/${id}`, unitData);
+  // PUT
+  updateUnit: async (id: number, data: UpdateUnitRequest): Promise<Unit> => {
+
+    const payload = {
+      unitId: data.UnitId,
+      unitName: data.UnitName,
+      abbreviation: data.Abbreviation,
+      createdBy: data.CreatedBy,
+      createdAt: data.CreatedAt,
+      modifiyBy: data.ModifiyBy,
+      modifiyAt: data.ModifiyAt ?? new Date().toISOString(),
+    };
+
+    const response = await axiosInstance.put(`/Units/${id}`, payload);
     return response.data;
   },
 
-  // DELETE: Delete unit
-  // Endpoint: DELETE /api/Units/{id}
+  // DELETE
   deleteUnit: async (id: number): Promise<void> => {
     await axiosInstance.delete(`/Units/${id}`);
   },

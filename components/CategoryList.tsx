@@ -68,7 +68,7 @@ export default function CategoryList({ onEdit }: CategoryListProps) {
   }
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div >
       <h2>All Categories ({categories.length})</h2>
       
       {categories.length === 0 ? (

@@ -34,7 +34,7 @@ export default function SuppliersPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-5 max-w-[1700px] mx-auto">
+      <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
         {/* Header */}
         <div className="flex justify-between items-center mb-8 pb-5 border-b-2 border-blue-600">
           <div>

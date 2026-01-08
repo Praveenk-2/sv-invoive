@@ -1,30 +1,29 @@
-// Component to display list of users
 'use client';
 
 import React from 'react';
-import { useUsers } from '@/hooks/useUsers';
-import { userService } from '@/services/userService';
-import { User } from '@/types/user.types';
+import { useAuditLogs } from '@/hooks/useAuditLogs';
+import { auditLogService } from '@/services/auditLogService';
+import { AuditLog } from '@/types/auditlog.types';
 
-interface UserListProps {
-  onEdit?: (user: User) => void;
+interface AuditLogListProps {
+  onEdit?: (log: AuditLog) => void;
 }
 
-export default function UserList({ onEdit }: UserListProps) {
-  const { users, loading, error, refetch } = useUsers();
+export default function AuditLogList({ onEdit }: AuditLogListProps) {
+  const { auditLogs, loading, error, refetch } = useAuditLogs();
 
   const handleDelete = async (id: number) => {
-    console.log('Deleting user with ID:', id);
+    console.log('Deleting audit log with ID:', id);
     
-    if (!confirm('Are you sure you want to delete this user?')) return;
+    if (!confirm('Are you sure you want to delete this audit log?')) return;
 
     try {
-      await userService.deleteUser(id);
-      alert('User deleted successfully!');
+      await auditLogService.deleteAuditLog(id);
+      alert('Audit log deleted successfully!');
       refetch();
     } catch (err: any) {
-      console.error('Error deleting user:', err);
-      const errorMsg = err?.response?.data?.message || err.message || 'Failed to delete user';
+      console.error('Error deleting audit log:', err);
+      const errorMsg = err?.response?.data?.message || err.message || 'Failed to delete audit log';
       alert(errorMsg);
     }
   };
@@ -45,10 +44,33 @@ export default function UserList({ onEdit }: UserListProps) {
     return `User #${userId}`;
   };
 
+  const getActionBadgeStyle = (action: string) => {
+    const baseStyle = {
+      padding: '4px 8px',
+      borderRadius: '4px',
+      fontSize: '12px',
+      fontWeight: 'bold',
+      color: 'white',
+    };
+
+    switch (action.toUpperCase()) {
+      case 'CREATE':
+      case 'INSERT':
+        return { ...baseStyle, backgroundColor: '#4caf50' };
+      case 'UPDATE':
+      case 'MODIFY':
+        return { ...baseStyle, backgroundColor: '#ff9800' };
+      case 'DELETE':
+        return { ...baseStyle, backgroundColor: '#f44336' };
+      default:
+        return { ...baseStyle, backgroundColor: '#2196f3' };
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ padding: '20px', textAlign: 'center' }}>
-        Loading users...
+        Loading audit logs...
       </div>
     );
   }
@@ -69,65 +91,70 @@ export default function UserList({ onEdit }: UserListProps) {
 
   return (
     <div >
-      <h2>All Users ({users.length})</h2>
+      <h2>All Audit Logs ({auditLogs.length})</h2>
       
-      {users.length === 0 ? (
+      {auditLogs.length === 0 ? (
         <p style={{ color: '#666', fontStyle: 'italic' }}>
-          No users found. Create your first user!
+          No audit logs found. Create your first audit log!
         </p>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
+        <div style={{ overflowX: 'auto' }} className='scroll-bar'>
           <table style={{ 
             width: '100%', 
             borderCollapse: 'collapse', 
             marginTop: '20px',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            minWidth: '1100px'
+            minWidth: '1400px'
           }}>
             <thead>
               <tr style={{ backgroundColor: '#1976d2', color: 'white' }}>
-                <th style={tableHeaderStyle}>User ID</th>
-                <th style={tableHeaderStyle}>Username</th>
-                <th style={tableHeaderStyle}>Email</th>
-                <th style={tableHeaderStyle}>Status</th>
-                <th style={tableHeaderStyle}>Created At</th>
+                <th style={tableHeaderStyle}>Log ID</th>
+                <th style={tableHeaderStyle}>Table Name</th>
+                <th style={tableHeaderStyle}>Record ID</th>
+                <th style={tableHeaderStyle}>Action</th>
+                <th style={tableHeaderStyle}>Old Value</th>
+                <th style={tableHeaderStyle}>New Value</th>
+                <th style={tableHeaderStyle}>Changed By</th>
+                <th style={tableHeaderStyle}>Changed At</th>
                 <th style={tableHeaderStyle}>Created By</th>
                 <th style={tableHeaderStyle}>Modified By</th>
-                <th style={tableHeaderStyle}>Modified At</th>
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
-                <tr key={user.UserId} style={{ borderBottom: '1px solid #ddd' }}>
-                  <td style={tableCellStyle}>{user.UserId}</td>
+              {auditLogs.map((log) => (
+                <tr key={log.LogId} style={{ borderBottom: '1px solid #ddd' }}>
+                  <td style={tableCellStyle}>{log.LogId}</td>
                   <td style={tableCellStyle}>
-                    <strong style={{ color: '#1976d2' }}>{user.Username}</strong>
+                    <strong style={{ color: '#1976d2' }}>{log.TableName}</strong>
+                  </td>
+                  <td style={tableCellStyle}>{log.RecordId}</td>
+                  <td style={tableCellStyle}>
+                    <span style={getActionBadgeStyle(log.Action)}>
+                      {log.Action}
+                    </span>
                   </td>
                   <td style={tableCellStyle}>
-                    <a 
-                      href={`mailto:${user.Email}`}
-                      style={{ color: '#1976d2', textDecoration: 'none' }}
-                    >
-                      {user.Email}
-                    </a>
-                  </td>
-                  <td style={tableCellStyle}>
-                    <span style={{
-                      padding: '4px 8px',
-                      borderRadius: '4px',
+                    <div style={{ 
+                      maxWidth: '150px', 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis',
                       fontSize: '12px',
-                      fontWeight: 'bold',
-                      backgroundColor: user.IsActive ? '#4caf50' : '#f44336',
-                      color: 'white',
+                      color: '#666'
                     }}>
-                      {user.IsActive ? 'Active' : 'Inactive'}
-                    </span>
+                      {log.OldValue || '-'}
+                    </div>
                   </td>
                   <td style={tableCellStyle}>
-                    <span style={{ fontSize: '13px', color: '#666' }}>
-                      {formatDate(user.CreatedAt)}
-                    </span>
+                    <div style={{ 
+                      maxWidth: '150px', 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis',
+                      fontSize: '12px',
+                      color: '#666'
+                    }}>
+                      {log.NewValue || '-'}
+                    </div>
                   </td>
                   <td style={tableCellStyle}>
                     <span style={{ 
@@ -136,7 +163,22 @@ export default function UserList({ onEdit }: UserListProps) {
                       borderRadius: '4px',
                       fontSize: '12px'
                     }}>
-                      {getUserName(user.CreatedBy)}
+                      {getUserName(log.ChangedBy)}
+                    </span>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <span style={{ fontSize: '13px', color: '#666' }}>
+                      {formatDate(log.ChangedAt)}
+                    </span>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <span style={{ 
+                      backgroundColor: '#e8f5e9', 
+                      padding: '4px 8px', 
+                      borderRadius: '4px',
+                      fontSize: '12px'
+                    }}>
+                      {getUserName(log.CreatedBy)}
                     </span>
                   </td>
                   <td style={tableCellStyle}>
@@ -146,12 +188,7 @@ export default function UserList({ onEdit }: UserListProps) {
                       borderRadius: '4px',
                       fontSize: '12px'
                     }}>
-                      {getUserName(user.ModifiyBy)}
-                    </span>
-                  </td>
-                  <td style={tableCellStyle}>
-                    <span style={{ fontSize: '13px', color: '#666' }}>
-                      {formatDate(user.ModifiyAt)}
+                      {getUserName(log.ModifiyBy)}
                     </span>
                   </td>
                   <td style={tableCellStyle}>
@@ -159,8 +196,8 @@ export default function UserList({ onEdit }: UserListProps) {
                       {onEdit && (
                         <button
                           onClick={() => {
-                            console.log('Editing user:', user);
-                            onEdit(user);
+                            console.log('Editing audit log:', log);
+                            onEdit(log);
                           }}
                           style={{
                             padding: '6px 12px',
@@ -175,7 +212,7 @@ export default function UserList({ onEdit }: UserListProps) {
                         </button>
                       )}
                       <button
-                        onClick={() => handleDelete(user.UserId)}
+                        onClick={() => handleDelete(log.LogId)}
                         style={{
                           padding: '6px 12px',
                           backgroundColor: '#d32f2f',

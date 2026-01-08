@@ -66,7 +66,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       hoverBg: 'hover:bg-blue-100',
     },
      {
-      name: 'Roles',
+      name: 'Roles-not done',
       href: '/dashboard/roles',
       icon: Settings,
       color: 'text-blue-600',
@@ -74,7 +74,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       hoverBg: 'hover:bg-blue-100',
     },
     {
-      name: 'User Roles',
+      name: 'User Roles-not done',
       href: '/dashboard/user-roles',
       icon: Settings,
       color: 'text-blue-600',
@@ -90,29 +90,54 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       hoverBg: 'hover:bg-blue-100',
     },
     {
-      name: 'Master',
-      href: '/dashboard/master',
-      icon: FileText,
+      name: 'Audit Logs',
+      href: '/dashboard/audit-logs',
+      icon: Settings,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
       hoverBg: 'hover:bg-blue-100',
     },
-    // {
-    //   name: 'Transaction',
-    //   href: '/dashboard/transaction',
-    //   icon: CreditCard,
-    //   color: 'text-blue-600',
-    //   bgColor: 'bg-blue-50',
-    //   hoverBg: 'hover:bg-blue-100',
-    // },
-    // {
-    //   name: 'Settings',
-    //   href: '/dashboard/settings',
-    //   icon: Settings,
-    //   color: 'text-blue-600',
-    //   bgColor: 'bg-blue-50',
-    //   hoverBg: 'hover:bg-blue-100',
-    // },
+    {
+      name: 'Goods Receipts',
+      href: '/dashboard/goods-receipts',
+      icon: Settings,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      hoverBg: 'hover:bg-blue-100',
+    },
+    {
+      name: 'Goods Receipt Items',
+      href: '/dashboard/goods-receipt-items',
+      icon: Settings,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      hoverBg: 'hover:bg-blue-100',
+    },
+    {
+      name: 'Item Batches',
+      href: '/dashboard/item-batches',
+      icon: Settings,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      hoverBg: 'hover:bg-blue-100',
+    },
+    {
+      name: 'Purchase Orders Items',
+      href: '/dashboard/purchase-order-items',
+      icon: Settings,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      hoverBg: 'hover:bg-blue-100',
+    },
+    {
+      name: 'Purchase Orders',
+      href: '/dashboard/purchase-orders',
+      icon: Settings,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      hoverBg: 'hover:bg-blue-100',
+    },
+    
   ];
 
   const isActive = (href: string) => pathname.startsWith(href);
@@ -157,7 +182,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div> */}
 
         {/* Navigation Tabs */}
-        <nav className="flex-1 px-4 py-6">
+        <nav className="flex-1 px-4 py-6 space-y-4 overflow-y-auto h-[600px] scroll-bar">
           <div className="space-y-2">
             {menuItems.map((item) => (
               <Link
@@ -169,7 +194,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     : `text-white ${item.hoverBg}`
                   }`}
               >
-                <item.icon className="h-5 w-5 mr-3" />
+                {/* <item.icon className="h-5 w-5 mr-3" /> */}
                 <span className="font-medium">{item.name}</span>
               </Link>
             ))}

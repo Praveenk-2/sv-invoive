@@ -13,10 +13,15 @@ interface UnitFormProps {
 
 export default function UnitForm({ unitToEdit, onSuccess, onCancel }: UnitFormProps) {
   const [formData, setFormData] = useState<CreateUnitRequest>({
-    UnitId: 0,
-    UnitName: '',
-    Abbreviation: '',
-  });
+  UnitId: 0,
+  UnitName: '',
+  Abbreviation: '',
+  CreatedBy: 0,
+  CreatedAt: new Date().toISOString(),
+  ModifiyBy: 0,
+  ModifiyAt: '',
+});
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -27,12 +32,16 @@ export default function UnitForm({ unitToEdit, onSuccess, onCancel }: UnitFormPr
         UnitId: unitToEdit.UnitId,
         UnitName: unitToEdit.UnitName,
         Abbreviation: unitToEdit.Abbreviation,
+        CreatedBy: formData.CreatedBy,
+        CreatedAt: formData.CreatedAt,
       });
     } else {
       setFormData({
         UnitId: 0,
         UnitName: '',
         Abbreviation: '',
+        CreatedBy: formData.CreatedBy,
+        CreatedAt: formData.CreatedAt,
       });
     }
   }, [unitToEdit]);
@@ -59,6 +68,8 @@ export default function UnitForm({ unitToEdit, onSuccess, onCancel }: UnitFormPr
         UnitId: 0,
         UnitName: '',
         Abbreviation: '',
+        CreatedBy: formData.CreatedBy,
+        CreatedAt: formData.CreatedAt,
       });
       
       if (onSuccess) onSuccess();

@@ -1,62 +1,61 @@
-// Component to create or update users
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { userService } from '@/services/userService';
-import { User } from '@/types/user.types';
+import { itemBatchesService } from '@/services/itemBatchesService';
+import { ItemBatch } from '@/types/itemBatches.types';
 import { useAuth } from '@/context/AuthContext';
 
-interface UserFormProps {
-  userToEdit?: User | null;
+interface ItemBatchesFormProps {
+  batchToEdit?: ItemBatch | null;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormProps) {
+export default function ItemBatchesForm({ batchToEdit, onSuccess, onCancel }: ItemBatchesFormProps) {
   const { user: currentUser } = useAuth();
 
   const [formData, setFormData] = useState({
-    UserId: 0,
-    Username: '',
-    PasswordHash: '',
-    Email: '',
-    IsActive: true,
-    CreatedAt: new Date().toISOString(),
+    BatchId: 0,
+    ItemId: 0,
+    BatchNo: '',
+    Quantity: 0,
+    ExpiryDate: '',
     CreatedBy: currentUser?.id || 0,
+    CreatedAt: new Date().toISOString(),
     ModifiyBy: 0,
-    ModifiyAt: null as string | null,  // null instead of empty string
+    ModifiyAt: null as string | null,
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (userToEdit) {
-      console.log('Editing user:', userToEdit);
+    if (batchToEdit) {
+      console.log('Editing item batch:', batchToEdit);
       setFormData({
-        UserId: userToEdit.UserId,
-        Username: userToEdit.Username,
-        PasswordHash: userToEdit.PasswordHash,
-        Email: userToEdit.Email,
-        IsActive: userToEdit.IsActive,
-        CreatedAt: userToEdit.CreatedAt,
-        CreatedBy: userToEdit.CreatedBy,
+        BatchId: batchToEdit.BatchId,
+        ItemId: batchToEdit.ItemId,
+        BatchNo: batchToEdit.BatchNo,
+        Quantity: batchToEdit.Quantity,
+        ExpiryDate: batchToEdit.ExpiryDate ? batchToEdit.ExpiryDate.slice(0, 10) : '',
+        CreatedBy: batchToEdit.CreatedBy,
+        CreatedAt: batchToEdit.CreatedAt,
         ModifiyBy: currentUser?.id || 0,
         ModifiyAt: new Date().toISOString(),
       });
     } else {
       setFormData({
-        UserId: 0,
-        Username: '',
-        PasswordHash: '',
-        Email: '',
-        IsActive: true,
-        CreatedAt: new Date().toISOString(),
+        BatchId: 0,
+        ItemId: 0,
+        BatchNo: '',
+        Quantity: 0,
+        ExpiryDate: '',
         CreatedBy: currentUser?.id || 0,
+        CreatedAt: new Date().toISOString(),
         ModifiyBy: 0,
-        ModifiyAt: null,  // null instead of empty string
+        ModifiyAt: null,
       });
     }
-  }, [userToEdit, currentUser]);
+  }, [batchToEdit, currentUser]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,39 +64,38 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
 
     console.log('Form data before sending:', formData);
 
-    // In UserForm.tsx handleSubmit function
     try {
-      if (userToEdit) {
-        console.log('Updating user with ID:', userToEdit.UserId);
-        await userService.updateUser(userToEdit.UserId, {
-          ...formData,
-          ModifiyAt: new Date().toISOString() // Ensure it's a valid date string
-        });
-        alert('User updated successfully!');
+      const submitData = {
+        ...formData,
+        ExpiryDate: formData.ExpiryDate ? new Date(formData.ExpiryDate).toISOString() : undefined,
+        ModifiyAt: new Date().toISOString()
+      };
+
+      if (batchToEdit) {
+        console.log('Updating item batch with ID:', batchToEdit.BatchId);
+        await itemBatchesService.updateItemBatch(batchToEdit.BatchId, submitData);
+        alert('Item batch updated successfully!');
       } else {
-        console.log('Creating new user');
-        await userService.createUser({
-          ...formData,
-          ModifiyAt: new Date().toISOString() // Ensure it's a valid date string for create too
-        });
-        alert('User created successfully!');
+        console.log('Creating new item batch');
+        await itemBatchesService.createItemBatch(submitData);
+        alert('Item batch created successfully!');
       }
 
       setFormData({
-        UserId: 0,
-        Username: '',
-        PasswordHash: '',
-        Email: '',
-        IsActive: true,
-        CreatedAt: new Date().toISOString(),
+        BatchId: 0,
+        ItemId: 0,
+        BatchNo: '',
+        Quantity: 0,
+        ExpiryDate: '',
         CreatedBy: currentUser?.id || 0,
+        CreatedAt: new Date().toISOString(),
         ModifiyBy: 0,
         ModifiyAt: null,
       });
 
       if (onSuccess) onSuccess();
     } catch (err: any) {
-      console.error('Error submitting user:', err);
+      console.error('Error submitting item batch:', err);
       console.error('Error response:', err?.response?.data);
       const errorMessage = err?.response?.data?.errors
         ? Object.values(err.response.data.errors).flat().join(', ')
@@ -109,10 +107,12 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : name === 'UserId' ? Number(value) : value,
+      [name]: name === 'BatchId' || name === 'ItemId' || name === 'Quantity'
+        ? Number(value)
+        : value,
     });
   };
 
@@ -121,9 +121,9 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
       padding: '20px',
       backgroundColor: '#f5f5f5',
       borderRadius: '8px',
-      maxWidth: '700px'
+      maxWidth: '800px'
     }}>
-      <h2>{userToEdit ? 'Edit User' : 'Create New User'}</h2>
+      <h2>{batchToEdit ? 'Edit Item Batch' : 'Create New Item Batch'}</h2>
 
       {error && (
         <div style={{
@@ -140,24 +140,24 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
       <form onSubmit={handleSubmit}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
           <div>
-            <label htmlFor="UserId" style={labelStyle}>
-              User ID *
+            <label htmlFor="BatchId" style={labelStyle}>
+              Batch ID *
             </label>
             <input
               type="number"
-              id="UserId"
-              name="UserId"
-              value={formData.UserId}
+              id="BatchId"
+              name="BatchId"
+              value={formData.BatchId}
               onChange={handleChange}
               required
-              disabled={!!userToEdit}
+              disabled={!!batchToEdit}
               style={{
                 ...inputStyle,
-                backgroundColor: userToEdit ? '#e0e0e0' : 'white',
+                backgroundColor: batchToEdit ? '#e0e0e0' : 'white',
               }}
               placeholder="e.g., 1"
             />
-            {userToEdit && (
+            {batchToEdit && (
               <small style={{ color: '#666', fontSize: '12px' }}>
                 ID cannot be changed
               </small>
@@ -165,84 +165,73 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
           </div>
 
           <div>
-            <label htmlFor="Username" style={labelStyle}>
-              Username *
+            <label htmlFor="ItemId" style={labelStyle}>
+              Item ID *
+            </label>
+            <input
+              type="number"
+              id="ItemId"
+              name="ItemId"
+              value={formData.ItemId}
+              onChange={handleChange}
+              required
+              style={inputStyle}
+              placeholder="e.g., 101"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="BatchNo" style={labelStyle}>
+              Batch Number *
             </label>
             <input
               type="text"
-              id="Username"
-              name="Username"
-              value={formData.Username}
+              id="BatchNo"
+              name="BatchNo"
+              value={formData.BatchNo}
               onChange={handleChange}
               required
               style={inputStyle}
-              placeholder="e.g., john_doe"
+              placeholder="e.g., BATCH-2024-001"
             />
           </div>
 
           <div>
-            <label htmlFor="Email" style={labelStyle}>
-              Email *
+            <label htmlFor="Quantity" style={labelStyle}>
+              Quantity *
             </label>
             <input
-              type="email"
-              id="Email"
-              name="Email"
-              value={formData.Email}
+              type="number"
+              id="Quantity"
+              name="Quantity"
+              value={formData.Quantity}
               onChange={handleChange}
               required
+              min="0"
               style={inputStyle}
-              placeholder="user@example.com"
+              placeholder="e.g., 100"
             />
           </div>
 
-          <div>
-            <label htmlFor="PasswordHash" style={labelStyle}>
-              Password {userToEdit ? '(leave blank to keep)' : '*'}
+          <div style={{ gridColumn: '1 / -1' }}>
+            <label htmlFor="ExpiryDate" style={labelStyle}>
+              Expiry Date
             </label>
             <input
-              type="password"
-              id="PasswordHash"
-              name="PasswordHash"
-              value={formData.PasswordHash}
+              type="date"
+              id="ExpiryDate"
+              name="ExpiryDate"
+              value={formData.ExpiryDate}
               onChange={handleChange}
-              required={!userToEdit}
               style={inputStyle}
-              placeholder="Enter password"
             />
             <small style={{ color: '#666', fontSize: '12px' }}>
-              {userToEdit ? 'Only fill to change password' : 'Min 6 characters'}
+              Leave blank if not applicable
             </small>
           </div>
         </div>
 
-        <div style={{ marginTop: '15px', marginBottom: '15px' }}>
-          <label style={{
-            display: 'flex',
-            alignItems: 'center',
-            cursor: 'pointer',
-            fontWeight: 'bold'
-          }}>
-            <input
-              type="checkbox"
-              name="IsActive"
-              checked={formData.IsActive}
-              onChange={handleChange}
-              style={{
-                marginRight: '10px',
-                width: '20px',
-                height: '20px',
-                cursor: 'pointer',
-              }}
-            />
-            Is Active
-          </label>
-          <small style={{ color: '#666', fontSize: '12px', marginLeft: '30px' }}>
-            Active users can log in to the system
-          </small>
-        </div>
-
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
           <button
             type="submit"
             disabled={submitting}
@@ -259,7 +248,7 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
               fontWeight: 'bold',
             }}
           >
-            {submitting ? 'Saving...' : (userToEdit ? 'Update User' : 'Create User')}
+            {submitting ? 'Saving...' : (batchToEdit ? 'Update Batch' : 'Create Batch')}
           </button>
 
           {onCancel && (

@@ -81,7 +81,7 @@ export default function ItemList({ onEdit }: ItemListProps) {
   }
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div >
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
