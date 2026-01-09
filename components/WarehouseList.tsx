@@ -102,7 +102,7 @@ export default function WarehouseList({ onEdit }: WarehouseListProps) {
               {warehouses.map((warehouse) => (
                 <tr key={warehouse.WarehouseId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>
-                    <strong style={{ color: '#1976d2' }}>{warehouse.WarehouseId}</strong>
+                    <strong style={{ color: '' }}>{warehouse.WarehouseId}</strong>
                   </td>
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

@@ -131,16 +131,15 @@ export default function UserPrivilegeList({ onEdit }: UserPrivilegeListProps) {
                       backgroundColor: '#e3f2fd', 
                       padding: '6px 12px', 
                       borderRadius: '4px',
-                      fontWeight: 'bold',
-                      color: '#1976d2'
+                      fontSize: '12px'
                     }}>
                       User #{privilege.UserId}
                     </span>
                   </td>
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '18px' }}>🖥️</span>
-                      <strong style={{ fontSize: '15px' }}>{privilege.ScreenName}</strong>
+                      {/* <span style={{ fontSize: '18px' }}>🖥️</span> */}
+                      <strong style={{ fontSize: '15px', color: '#524f4f' }}>{privilege.ScreenName}</strong>
                     </div>
                   </td>
                   <td style={tableCellStyle}>

@@ -129,7 +129,7 @@ export default function PurchaseOrderItemsList({ onEdit }: PurchaseOrderItemsLis
               {purchaseOrderItems.map((item) => (
                 <tr key={item.POItemId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>
-                    <strong style={{ color: '#1976d2' }}>{item.POItemId}</strong>
+                    <strong style={{ color: '' }}>{item.POItemId}</strong>
                   </td>
                   <td style={tableCellStyle}>
                     <span style={{ 
@@ -163,7 +163,7 @@ export default function PurchaseOrderItemsList({ onEdit }: PurchaseOrderItemsLis
                   </td>
                   <td style={tableCellStyle}>
                     <span style={{ 
-                      color: '#1565c0', 
+                      color: '', 
                       fontWeight: 'bold',
                       fontSize: '16px'
                     }}>

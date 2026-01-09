@@ -106,13 +106,13 @@ export default function UserRoleList({ onEdit }: UserRoleListProps) {
               {userRoles.map((userRole) => (
                 <tr key={userRole.UserRoleId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>
-                    <strong style={{ color: '#1976d2', fontSize: '16px' }}>
+                    <strong style={{ color: '', fontSize: '16px' }}>
                       {userRole.UserRoleId}
                     </strong>
                   </td>
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '18px' }}>👤</span>
+                      {/* <span style={{ fontSize: '18px' }}>👤</span> */}
                       <span style={{ 
                         backgroundColor: '#e3f2fd', 
                         padding: '6px 12px', 
@@ -126,7 +126,7 @@ export default function UserRoleList({ onEdit }: UserRoleListProps) {
                   </td>
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '18px' }}>🎭</span>
+                      {/* <span style={{ fontSize: '18px' }}>🎭</span> */}
                       <span style={{ 
                         backgroundColor: '#f3e5f5', 
                         padding: '6px 12px', 

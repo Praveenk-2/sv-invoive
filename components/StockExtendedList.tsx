@@ -218,7 +218,7 @@ export default function StockExtendedList({ onEdit }: StockExtendedListProps) {
               {stocks.map((stock) => (
                 <tr key={stock.StockId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>
-                    <strong style={{ color: '#1976d2', fontSize: '16px' }}>
+                    <strong style={{ color: '', fontSize: '16px' }}>
                       {stock.StockId}
                     </strong>
                   </td>

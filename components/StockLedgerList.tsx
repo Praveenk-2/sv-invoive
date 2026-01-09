@@ -130,7 +130,7 @@ export default function StockLedgerList({ onEdit }: StockLedgerListProps) {
               {stockLedgers.map((ledger) => (
                 <tr key={ledger.LedgerId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>
-                    <strong style={{ color: '#1976d2' }}>{ledger.LedgerId}</strong>
+                    <strong style={{ color: '' }}>{ledger.LedgerId}</strong>
                   </td>
                   <td style={tableCellStyle}>
                     <span style={{ 

@@ -102,7 +102,7 @@ export default function CategoryList({ onEdit }: CategoryListProps) {
                 <tr key={category.CategoryId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>{category.CategoryId}</td>
                   <td style={tableCellStyle}>
-                    <strong style={{ color: '#1976d2' }}>{category.CategoryName}</strong>
+                    <strong style={{ color: '#524f4f' }}>{category.CategoryName}</strong>
                   </td>
                   <td style={tableCellStyle}>
                     {category.Description ? (

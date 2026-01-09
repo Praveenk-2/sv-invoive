@@ -137,9 +137,9 @@ export default function ItemList({ onEdit }: ItemListProps) {
                 <tr key={item.ItemId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>{item.ItemId}</td>
                   <td style={tableCellStyle}>
-                    <strong>{item.ItemName}</strong>
+                    <strong style={{ color: '#524f4f' }}>{item.ItemName}</strong>
                     {item.Description && (
-                      <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                      <div style={{ fontSize: '12px', color: '#524f4f', marginTop: '4px' }}>
                         {item.Description.substring(0, 50)}
                         {item.Description.length > 50 && '...'}
                       </div>
@@ -150,7 +150,7 @@ export default function ItemList({ onEdit }: ItemListProps) {
                       backgroundColor: '#f5f5f5', 
                       padding: '4px 8px', 
                       borderRadius: '4px',
-                      fontSize: '12px'
+                      fontSize: '12px',
                     }}>
                       {item.SKU}
                     </code>

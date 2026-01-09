@@ -129,7 +129,7 @@ export default function GoodsReceiptList({ onEdit }: GoodsReceiptListProps) {
                 <tr key={grn.GRNId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>{grn.GRNId}</td>
                   <td style={tableCellStyle}>
-                    <strong style={{ color: '#1976d2' }}>{grn.GRNNumber}</strong>
+                    <strong style={{ color: '#524f4f' }}>{grn.GRNNumber}</strong>
                   </td>
                   <td style={tableCellStyle}>
                     <span style={{ 

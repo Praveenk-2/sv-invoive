@@ -134,9 +134,9 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
                 <tr key={supplier.SupplierId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>{supplier.SupplierId}</td>
                   <td style={tableCellStyle}>
-                    <strong style={{ color: '#1976d2' }}>{supplier.SupplierName}</strong>
+                    <strong style={{ color: '#524f4f' }}>{supplier.SupplierName}</strong>
                     {supplier.Address && (
-                      <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>
+                      <div style={{ fontSize: '11px', color: '#524f4f', marginTop: '4px' }}>
                         {supplier.Address.substring(0, 40)}
                         {supplier.Address.length > 40 && '...'}
                       </div>

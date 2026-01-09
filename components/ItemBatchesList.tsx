@@ -151,7 +151,7 @@ export default function ItemBatchesList({ onEdit }: ItemBatchesListProps) {
               {itemBatches.map((batch) => (
                 <tr key={batch.BatchId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>
-                    <strong style={{ color: '#1976d2' }}>{batch.BatchId}</strong>
+                    <strong style={{ color: '' }}>{batch.BatchId}</strong>
                   </td>
                   <td style={tableCellStyle}>
                     <span style={{ 

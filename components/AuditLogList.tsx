@@ -126,7 +126,7 @@ export default function AuditLogList({ onEdit }: AuditLogListProps) {
                 <tr key={log.LogId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>{log.LogId}</td>
                   <td style={tableCellStyle}>
-                    <strong style={{ color: '#1976d2' }}>{log.TableName}</strong>
+                    <strong style={{color: '#524f4f'}}>{log.TableName}</strong>
                   </td>
                   <td style={tableCellStyle}>{log.RecordId}</td>
                   <td style={tableCellStyle}>

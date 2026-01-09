@@ -102,7 +102,7 @@ export default function UserList({ onEdit }: UserListProps) {
                 <tr key={user.UserId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>{user.UserId}</td>
                   <td style={tableCellStyle}>
-                    <strong style={{ color: '#1976d2' }}>{user.Username}</strong>
+                    <strong style={{ color: '#524f4f' }}>{user.Username}</strong>
                   </td>
                   <td style={tableCellStyle}>
                     <a 

@@ -165,11 +165,11 @@ export default function PurchaseOrdersList({ onEdit }: PurchaseOrdersListProps) 
                             {purchaseOrders.map((po) => (
                                 <tr key={po.POId} style={{ borderBottom: '1px solid #ddd' }}>
                                     <td style={tableCellStyle}>
-                                        <strong style={{ color: '#1976d2' }}>{po.POId}</strong>
+                                        <strong style={{ color: '' }}>{po.POId}</strong>
                                     </td>
                                     <td style={tableCellStyle}>
                                         <strong style={{
-                                            color: '#1565c0',
+                                            color: '',
                                             fontSize: '14px'
                                         }}>
                                             {po.PONumber}
@@ -197,7 +197,7 @@ export default function PurchaseOrdersList({ onEdit }: PurchaseOrdersListProps) 
                                     </td>
                                     <td style={tableCellStyle}>
                                         <span style={{
-                                            color: '#1565c0',
+                                            color: '',
                                             fontWeight: 'bold',
                                             fontSize: '16px'
                                         }}>

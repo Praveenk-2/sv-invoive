@@ -65,7 +65,7 @@ export default function RoleList({ onEdit }: RoleListProps) {
         return icon;
       }
     }
-    return '🎭'; // Default icon
+    return ''; // Default icon
   };
 
   if (loading) {
@@ -122,12 +122,12 @@ export default function RoleList({ onEdit }: RoleListProps) {
               {roles.map((role) => (
                 <tr key={role.RoleId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>
-                    <strong style={{ color: '#1976d2', fontSize: '16px' }}>{role.RoleId}</strong>
+                    <strong style={{ color: '', fontSize: '16px' }}>{role.RoleId}</strong>
                   </td>
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       {/* <span style={{ fontSize: '24px' }}>{(role.RoleName)}</span> */}
-                      <strong style={{ fontSize: '16px' }}>{role.RoleName}</strong>
+                      <strong style={{ fontSize: '16px', color: '#524f4f' }}>{role.RoleName}</strong>
                     </div>
                   </td>
                   <td style={tableCellStyle}>

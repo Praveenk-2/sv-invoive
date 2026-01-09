@@ -101,7 +101,7 @@ export default function UnitList({ onEdit }: UnitListProps) {
                 <tr key={unit.UnitId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>{unit.UnitId}</td>
                   <td style={tableCellStyle}>
-                    <strong>{unit.UnitName}</strong>
+                    <strong style={{color: '#524f4f'}}>{unit.UnitName}</strong>
                   </td>
                   <td style={tableCellStyle}>
                     <span style={{
@@ -109,24 +109,30 @@ export default function UnitList({ onEdit }: UnitListProps) {
                       backgroundColor: '#e3f2fd',
                       color: '#1976d2',
                       borderRadius: '4px',
-                      fontWeight: 'bold',
-                      fontSize: '14px',
-                      fontFamily: 'monospace',
+                      fontSize: '12px',
                     }}>
                       {unit.Abbreviation}
                     </span>
                   </td>
                   <td style={tableCellStyle}>
-                    <strong>{formatDate(unit.CreatedAt)}</strong>
+                    <span style={{ backgroundColor: '#e3f2fd', 
+                      padding: '4px 8px', 
+                      borderRadius: '4px',
+                      fontSize: '12px'
+                    }}>
+                      {getUserName(unit.CreatedBy)}
+                    </span>
                   </td>
                   <td style={tableCellStyle}>
-                    <strong>{getUserName(unit.CreatedBy)}</strong>
+                    <span style={{ fontSize: '13px', color: '#666' }}>
+                      {formatDate(unit.CreatedAt)}
+                    </span>
                   </td>
                   <td style={tableCellStyle}>
-                    <strong>{unit.ModifiyBy}</strong>
+                    <span style={{ fontSize: '13px', color: '#666' }}>{getUserName(unit.ModifiyBy)}</span>
                   </td>
                   <td style={tableCellStyle}>
-                    <strong>{formatDate(unit.ModifiyAt)}</strong>
+                    <span style={{ fontSize: '13px', color: '#666' }}>{formatDate(unit.ModifiyAt)}</span>
                   </td>
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>
@@ -169,40 +175,6 @@ export default function UnitList({ onEdit }: UnitListProps) {
           </table>
         </div>
       )}
-
-      {/* Common Units Reference Card */}
-      <div style={{ 
-        marginTop: '30px', 
-        padding: '20px', 
-        backgroundColor: '#f5f5f5',
-        borderRadius: '8px',
-        border: '1px solid #ddd'
-      }}>
-        <h3 style={{ marginTop: 0, color: '#1976d2' }}>📏 Common Units Reference</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
-          {[
-            { name: 'Kilogram', abbr: 'kg' },
-            { name: 'Gram', abbr: 'g' },
-            { name: 'Liter', abbr: 'L' },
-            { name: 'Milliliter', abbr: 'mL' },
-            { name: 'Meter', abbr: 'm' },
-            { name: 'Centimeter', abbr: 'cm' },
-            { name: 'Piece', abbr: 'pcs' },
-            { name: 'Dozen', abbr: 'dz' },
-            { name: 'Box', abbr: 'box' },
-            { name: 'Packet', abbr: 'pkt' },
-          ].map((ref, idx) => (
-            <div key={idx} style={{ 
-              padding: '10px', 
-              backgroundColor: 'white',
-              borderRadius: '4px',
-              fontSize: '13px'
-            }}>
-              <strong>{ref.name}</strong> - <code>{ref.abbr}</code>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

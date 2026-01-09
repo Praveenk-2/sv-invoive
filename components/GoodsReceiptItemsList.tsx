@@ -135,7 +135,7 @@ export default function GoodsReceiptItemsList({ onEdit }: GoodsReceiptItemsListP
               {goodsReceiptItems.map((item) => (
                 <tr key={item.GRNItemId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>
-                    <strong style={{ color: '#1976d2' }}>{item.GRNItemId}</strong>
+                    <strong style={{ color: '' }}>{item.GRNItemId}</strong>
                   </td>
                   <td style={tableCellStyle}>
                     <span style={{ 
@@ -163,13 +163,12 @@ export default function GoodsReceiptItemsList({ onEdit }: GoodsReceiptItemsListP
                     </strong>
                   </td>
                   <td style={tableCellStyle}>
-                    <span style={{ color: '#2e7d32', fontWeight: 'bold' }}>
+                    <span style={{ fontWeight: 'bold' }}>
                       {formatCurrency(item.UnitPrice)}
                     </span>
                   </td>
                   <td style={tableCellStyle}>
                     <span style={{ 
-                      color: '#1565c0', 
                       fontWeight: 'bold',
                       fontSize: '15px'
                     }}>

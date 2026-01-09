@@ -139,7 +139,7 @@ export default function StockAdjustmentsList({ onEdit }: StockAdjustmentsListPro
               {stockAdjustments.map((adjustment) => (
                 <tr key={adjustment.AdjustmentId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>
-                    <strong style={{ color: '#1976d2' }}>{adjustment.AdjustmentId}</strong>
+                    <strong style={{ color: '' }}>{adjustment.AdjustmentId}</strong>
                   </td>
                   <td style={tableCellStyle}>
                     <span style={{ 
