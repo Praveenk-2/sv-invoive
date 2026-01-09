@@ -1,31 +1,31 @@
-// components/RoleList.tsx
-// Component to display list of roles
+// components/WarehouseList.tsx
+// Component to display list of warehouses
 'use client';
 
 import React from 'react';
-import { useRoles } from '@/hooks/useRoles';
-import { roleService } from '@/services/roleService';
-import { Role } from '@/types/role.types';
+import { useWarehouses } from '@/hooks/useWarehouse';
+import { warehouseService } from '@/services/warehouseService';
+import { Warehouse } from '@/types/warehouse.types';
 
-interface RoleListProps {
-  onEdit?: (role: Role) => void;
+interface WarehouseListProps {
+  onEdit?: (warehouse: Warehouse) => void;
 }
 
-export default function RoleList({ onEdit }: RoleListProps) {
-  const { roles, loading, error, refetch } = useRoles();
+export default function WarehouseList({ onEdit }: WarehouseListProps) {
+  const { warehouses, loading, error, refetch } = useWarehouses();
 
   const handleDelete = async (id: number) => {
-    console.log('Deleting role with ID:', id);
+    console.log('Deleting warehouse with ID:', id);
     
-    if (!confirm('Are you sure you want to delete this role?')) return;
+    if (!confirm('Are you sure you want to delete this warehouse?')) return;
 
     try {
-      await roleService.deleteRole(id);
-      alert('Role deleted successfully!');
+      await warehouseService.deleteWarehouse(id);
+      alert('Warehouse deleted successfully!');
       refetch();
     } catch (err: any) {
-      console.error('Error deleting role:', err);
-      const errorMsg = err?.response?.data?.message || err.message || 'Failed to delete role';
+      console.error('Error deleting warehouse:', err);
+      const errorMsg = err?.response?.data?.message || err.message || 'Failed to delete warehouse';
       alert(errorMsg);
     }
   };
@@ -46,32 +46,10 @@ export default function RoleList({ onEdit }: RoleListProps) {
     return `User #${userId}`;
   };
 
-  const getRoleIcon = (roleName: string) => {
-    const roleIcons: { [key: string]: string } = {
-      '': '👑',
-      '': '👑',
-      '': '👔',
-      '': '👨‍💼',
-      '': '👤',
-      '': '👤',
-      '': '🚶',
-      '': '💻',
-      '': '🎧',
-      '': '💼',
-    };
-
-    for (const [key, icon] of Object.entries(roleIcons)) {
-      if (roleName.toLowerCase().includes(key.toLowerCase())) {
-        return icon;
-      }
-    }
-    return '🎭'; // Default icon
-  };
-
   if (loading) {
     return (
       <div style={{ padding: '20px', textAlign: 'center' }}>
-        Loading roles...
+        Loading warehouses...
       </div>
     );
   }
@@ -92,11 +70,11 @@ export default function RoleList({ onEdit }: RoleListProps) {
 
   return (
     <div style={{ padding: '20px' }}>
-      <h2>All Roles ({roles.length})</h2>
+      <h2>All Warehouses ({warehouses.length})</h2>
       
-      {roles.length === 0 ? (
+      {warehouses.length === 0 ? (
         <p style={{ color: '#666', fontStyle: 'italic' }}>
-          No roles found. Create your first role!
+          No warehouses found. Create your first warehouse!
         </p>
       ) : (
         <div style={{ overflowX: 'auto' }}>
@@ -105,12 +83,14 @@ export default function RoleList({ onEdit }: RoleListProps) {
             borderCollapse: 'collapse', 
             marginTop: '20px',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            minWidth: '1000px'
+            minWidth: '1100px'
           }}>
             <thead>
               <tr style={{ backgroundColor: '#1976d2', color: 'white' }}>
-                <th style={tableHeaderStyle}>Role ID</th>
-                <th style={tableHeaderStyle}>Role Name</th>
+                <th style={tableHeaderStyle}>Warehouse ID</th>
+                <th style={tableHeaderStyle}>Warehouse Name</th>
+                <th style={tableHeaderStyle}>Location</th>
+                <th style={tableHeaderStyle}>Status</th>
                 <th style={tableHeaderStyle}>Created By</th>
                 <th style={tableHeaderStyle}>Created At</th>
                 <th style={tableHeaderStyle}>Modified By</th>
@@ -119,16 +99,34 @@ export default function RoleList({ onEdit }: RoleListProps) {
               </tr>
             </thead>
             <tbody>
-              {roles.map((role) => (
-                <tr key={role.RoleId} style={{ borderBottom: '1px solid #ddd' }}>
+              {warehouses.map((warehouse) => (
+                <tr key={warehouse.WarehouseId} style={{ borderBottom: '1px solid #ddd' }}>
                   <td style={tableCellStyle}>
-                    <strong style={{ color: '#1976d2', fontSize: '16px' }}>{role.RoleId}</strong>
+                    <strong style={{ color: '#1976d2' }}>{warehouse.WarehouseId}</strong>
                   </td>
                   <td style={tableCellStyle}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      {/* <span style={{ fontSize: '24px' }}>{(role.RoleName)}</span> */}
-                      <strong style={{ fontSize: '16px' }}>{role.RoleName}</strong>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {/* <span style={{ fontSize: '20px' }}>🏢</span> */}
+                      <strong style={{ fontSize: '15px' }}>{warehouse.WarehouseName}</strong>
                     </div>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '16px' }}>📍</span>
+                      <span style={{ color: '#666' }}>{warehouse.Location}</span>
+                    </div>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <span style={{
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      fontSize: '12px',
+                      fontWeight: 'bold',
+                      backgroundColor: warehouse.IsActive ? '#4caf50' : '#f44336',
+                      color: 'white',
+                    }}>
+                      {warehouse.IsActive ? 'Active' : 'Inactive'}
+                    </span>
                   </td>
                   <td style={tableCellStyle}>
                     <span style={{ 
@@ -137,12 +135,12 @@ export default function RoleList({ onEdit }: RoleListProps) {
                       borderRadius: '4px',
                       fontSize: '12px'
                     }}>
-                      {getUserName(role.CreatedBy)}
+                      {getUserName(warehouse.CreatedBy)}
                     </span>
                   </td>
                   <td style={tableCellStyle}>
                     <span style={{ fontSize: '13px', color: '#666' }}>
-                      {formatDate(role.CreatedAt)}
+                      {formatDate(warehouse.CreatedAt)}
                     </span>
                   </td>
                   <td style={tableCellStyle}>
@@ -152,12 +150,12 @@ export default function RoleList({ onEdit }: RoleListProps) {
                       borderRadius: '4px',
                       fontSize: '12px'
                     }}>
-                      {getUserName(role.ModifiyBy)}
+                      {getUserName(warehouse.ModifiyBy)}
                     </span>
                   </td>
                   <td style={tableCellStyle}>
                     <span style={{ fontSize: '13px', color: '#666' }}>
-                      {formatDate(role.ModifiyAt)}
+                      {formatDate(warehouse.ModifiyAt)}
                     </span>
                   </td>
                   <td style={tableCellStyle}>
@@ -165,8 +163,8 @@ export default function RoleList({ onEdit }: RoleListProps) {
                       {onEdit && (
                         <button
                           onClick={() => {
-                            console.log('Editing role:', role);
-                            onEdit(role);
+                            console.log('Editing warehouse:', warehouse);
+                            onEdit(warehouse);
                           }}
                           style={{
                             padding: '6px 12px',
@@ -181,7 +179,7 @@ export default function RoleList({ onEdit }: RoleListProps) {
                         </button>
                       )}
                       <button
-                        onClick={() => handleDelete(role.RoleId)}
+                        onClick={() => handleDelete(warehouse.WarehouseId)}
                         style={{
                           padding: '6px 12px',
                           backgroundColor: '#d32f2f',

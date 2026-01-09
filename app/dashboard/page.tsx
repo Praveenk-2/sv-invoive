@@ -1,15 +1,5 @@
-'use client';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import DashboardLayout from '@/components/DashboardLayout';
-import { useRouter } from 'next/navigation';
+import { redirect } from 'next/navigation';
 
 export default function DashboardPage() {
-  const router = useRouter();
-  return (router.push('/dashboard/users'));
-
-  return (
-    // <ProtectedRoute>
-      <></>
-    // </ProtectedRoute>
-  );
+  redirect('/dashboard/users');
 }

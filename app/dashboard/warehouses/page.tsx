@@ -1,44 +1,44 @@
-// app/roles/page.tsx
-// Complete Roles management page
+// app/warehouses/page.tsx
+// Complete Warehouses management page
 'use client';
 
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
-import RoleList from '@/components/RoleList';
-import RoleForm from '@/components/RoleForm';
-import { Role } from '@/types/role.types';
+import WarehouseList from '@/components/WarehouseList';
+import WarehouseForm from '@/components/WarehouseForm';
+import { Warehouse } from '@/types/warehouse.types';
 
-export default function RolesPage() {
+export default function WarehousesPage() {
   const [showForm, setShowForm] = useState(false);
-  const [editingRole, setEditingRole] = useState<Role | null>(null);
+  const [editingWarehouse, setEditingWarehouse] = useState<Warehouse | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const handleEdit = (role: Role) => {
-    setEditingRole(role);
+  const handleEdit = (warehouse: Warehouse) => {
+    setEditingWarehouse(warehouse);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSuccess = () => {
     setShowForm(false);
-    setEditingRole(null);
+    setEditingWarehouse(null);
     setRefreshKey(prev => prev + 1);
   };
 
   const handleCancel = () => {
     setShowForm(false);
-    setEditingRole(null);
+    setEditingWarehouse(null);
   };
 
   const handleCreateNew = () => {
-    setEditingRole(null);
+    setEditingWarehouse(null);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <DashboardLayout>
-      <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ padding: '20px', maxWidth: '1500px', margin: '0 auto' }}>
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
@@ -48,9 +48,9 @@ export default function RolesPage() {
           borderBottom: '2px solid #1976d2'
         }}>
           <div>
-            <h1 style={{ margin: 0, color: '#1976d2' }}>Roles Management</h1>
+            <h1 style={{ margin: 0, color: '#1976d2' }}>Warehouse Management</h1>
             <p style={{ margin: '5px 0 0 0', color: '#666' }}>
-              Define and manage user roles with complete audit trail tracking
+              Manage warehouse locations and facilities with complete audit trail
             </p>
           </div>
           <button
@@ -66,7 +66,7 @@ export default function RolesPage() {
               fontWeight: 'bold',
             }}
           >
-            + Create New Role
+            + Create New Warehouse
           </button>
         </div>
 
@@ -79,8 +79,8 @@ export default function RolesPage() {
               >
                 ✕
               </button>
-              <RoleForm 
-                roleToEdit={editingRole}
+              <WarehouseForm 
+                warehouseToEdit={editingWarehouse}
                 onSuccess={handleSuccess}
                 onCancel={handleCancel}
               />
@@ -88,7 +88,7 @@ export default function RolesPage() {
           </div>
         )}
 
-        <RoleList key={refreshKey} onEdit={handleEdit} />
+        <WarehouseList key={refreshKey} onEdit={handleEdit} />
       </div>
     </DashboardLayout>
   );

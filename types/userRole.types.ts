@@ -1,34 +1,32 @@
-// Define UserRole types based on your UPDATED database structure
+// types/userrole.types.ts
+// Define UserRole types based on your database structure
 
 export interface UserRole {
   UserRoleId: number;
   UserId: number;
   RoleId: number;
-  CreatedBy: string;
+  CreatedBy: number;
   CreatedAt: string;
-  ModifiyBy: string;
+  ModifiyBy: number;
   ModifiyAt: string;
-  // Optional: Include user and role details if API returns them
-  Username?: string;
-  RoleName?: string;
 }
 
 export interface CreateUserRoleRequest {
   UserRoleId: number;
   UserId: number;
   RoleId: number;
-  CreatedBy: string;
+  CreatedBy: number;
   CreatedAt?: string;
-  ModifiyBy?: string;
-  ModifiyAt?: string;
+  ModifiyBy?: number;
+  ModifiyAt?: string | null;
 }
 
 export interface UpdateUserRoleRequest {
   UserRoleId: number;
   UserId: number;
   RoleId: number;
-  CreatedBy?: string;
+  CreatedBy?: number;
   CreatedAt?: string;
-  ModifiyBy: string;
-  ModifiyAt?: string;
+  ModifiyBy: number;
+  ModifiyAt?: string | null;
 }

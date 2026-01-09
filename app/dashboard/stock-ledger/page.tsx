@@ -1,44 +1,44 @@
-// app/roles/page.tsx
-// Complete Roles management page
+// app/stock-ledger/page.tsx
+// Complete Stock Ledger management page
 'use client';
 
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
-import RoleList from '@/components/RoleList';
-import RoleForm from '@/components/RoleForm';
-import { Role } from '@/types/role.types';
+import StockLedgerList from '@/components/StockLedgerList';
+import StockLedgerForm from '@/components/StockLedgerForm';
+import { StockLedger } from '@/types/Stockledger.types';
 
-export default function RolesPage() {
+export default function StockLedgerPage() {
   const [showForm, setShowForm] = useState(false);
-  const [editingRole, setEditingRole] = useState<Role | null>(null);
+  const [editingLedger, setEditingLedger] = useState<StockLedger | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const handleEdit = (role: Role) => {
-    setEditingRole(role);
+  const handleEdit = (ledger: StockLedger) => {
+    setEditingLedger(ledger);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSuccess = () => {
     setShowForm(false);
-    setEditingRole(null);
+    setEditingLedger(null);
     setRefreshKey(prev => prev + 1);
   };
 
   const handleCancel = () => {
     setShowForm(false);
-    setEditingRole(null);
+    setEditingLedger(null);
   };
 
   const handleCreateNew = () => {
-    setEditingRole(null);
+    setEditingLedger(null);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <DashboardLayout>
-      <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ padding: '20px', maxWidth: '1600px', margin: '0 auto' }}>
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
@@ -48,9 +48,9 @@ export default function RolesPage() {
           borderBottom: '2px solid #1976d2'
         }}>
           <div>
-            <h1 style={{ margin: 0, color: '#1976d2' }}>Roles Management</h1>
+            <h1 style={{ margin: 0, color: '#1976d2' }}>Stock Ledger Management</h1>
             <p style={{ margin: '5px 0 0 0', color: '#666' }}>
-              Define and manage user roles with complete audit trail tracking
+              Track all inventory movements and stock changes with complete audit trail
             </p>
           </div>
           <button
@@ -66,21 +66,21 @@ export default function RolesPage() {
               fontWeight: 'bold',
             }}
           >
-            + Create New Role
+            + Add Stock Transaction
           </button>
         </div>
 
         {showForm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="bg-white w-full max-w-3xl rounded-lg shadow-xl p-6 relative max-h-[90vh] overflow-y-auto scroll-bar">
+            <div className="bg-white w-full max-w-4xl rounded-lg shadow-xl p-6 relative max-h-[90vh] overflow-y-auto scroll-bar">
               <button
                 onClick={handleCancel}
                 className="absolute top-1 right-1 text-gray-500 hover:text-red-500 text-xl cursor-pointer"
               >
                 ✕
               </button>
-              <RoleForm 
-                roleToEdit={editingRole}
+              <StockLedgerForm 
+                ledgerToEdit={editingLedger}
                 onSuccess={handleSuccess}
                 onCancel={handleCancel}
               />
@@ -88,7 +88,7 @@ export default function RolesPage() {
           </div>
         )}
 
-        <RoleList key={refreshKey} onEdit={handleEdit} />
+        <StockLedgerList key={refreshKey} onEdit={handleEdit} />
       </div>
     </DashboardLayout>
   );

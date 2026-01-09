@@ -1,4 +1,5 @@
-// Complete UserRoles management page with all CRUD operations
+// app/user-roles/page.tsx
+// Complete User Roles Assignment management page
 'use client';
 
 import React, { useState } from 'react';
@@ -37,7 +38,7 @@ export default function UserRolesPage() {
 
   return (
     <DashboardLayout>
-      <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
+      <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
@@ -47,9 +48,9 @@ export default function UserRolesPage() {
           borderBottom: '2px solid #1976d2'
         }}>
           <div>
-            <h1 style={{ margin: 0, color: '#1976d2' }}>🔐 User Role Management</h1>
+            <h1 style={{ margin: 0, color: '#1976d2' }}>User Roles Assignment</h1>
             <p style={{ margin: '5px 0 0 0', color: '#666' }}>
-              Assign roles to users with full audit trail tracking
+              Assign roles to users and manage role-based access with audit trail
             </p>
           </div>
           <button
@@ -65,7 +66,7 @@ export default function UserRolesPage() {
               fontWeight: 'bold',
             }}
           >
-            + Assign Role to User
+            + Assign User Role
           </button>
         </div>
 
@@ -78,12 +79,12 @@ export default function UserRolesPage() {
               >
                 ✕
               </button>
-            <UserRoleForm 
-              userRoleToEdit={editingUserRole}
-              onSuccess={handleSuccess}
-              onCancel={handleCancel}
-            />
-          </div>
+              <UserRoleForm 
+                userRoleToEdit={editingUserRole}
+                onSuccess={handleSuccess}
+                onCancel={handleCancel}
+              />
+            </div>
           </div>
         )}
 

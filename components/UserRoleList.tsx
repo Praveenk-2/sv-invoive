@@ -1,8 +1,9 @@
+// components/UserRoleList.tsx
 // Component to display list of user role assignments
 'use client';
 
 import React from 'react';
-import { useUserRoles } from '@/hooks/useUserRoles';
+import { useUserRoles } from '@/hooks/useUserRole';
 import { userRoleService } from '@/services/userRoleService';
 import { UserRole } from '@/types/userRole.types';
 
@@ -20,7 +21,7 @@ export default function UserRoleList({ onEdit }: UserRoleListProps) {
 
     try {
       await userRoleService.deleteUserRole(id);
-      alert('User role deleted successfully!');
+      alert('User role assignment deleted successfully!');
       refetch();
     } catch (err: any) {
       console.error('Error deleting user role:', err);
@@ -40,10 +41,20 @@ export default function UserRoleList({ onEdit }: UserRoleListProps) {
     });
   };
 
+  const getUserName = (userId: number) => {
+    if (!userId) return '-';
+    return `User #${userId}`;
+  };
+
+  const getRoleName = (roleId: number) => {
+    if (!roleId) return '-';
+    return `Role #${roleId}`;
+  };
+
   if (loading) {
     return (
       <div style={{ padding: '20px', textAlign: 'center' }}>
-        Loading user roles...
+        Loading user role assignments...
       </div>
     );
   }
@@ -63,15 +74,15 @@ export default function UserRoleList({ onEdit }: UserRoleListProps) {
   }
 
   return (
-    <div >
+    <div style={{ padding: '20px' }}>
       <h2>All User Role Assignments ({userRoles.length})</h2>
       
       {userRoles.length === 0 ? (
         <p style={{ color: '#666', fontStyle: 'italic' }}>
-          No user role assignments found. Assign a role to a user!
+          No user role assignments found. Assign your first user role!
         </p>
       ) : (
-        <div style={{ overflowX: 'auto' }} className='scroll-bar'>
+        <div style={{ overflowX: 'auto' }}>
           <table style={{ 
             width: '100%', 
             borderCollapse: 'collapse', 
@@ -81,15 +92,9 @@ export default function UserRoleList({ onEdit }: UserRoleListProps) {
           }}>
             <thead>
               <tr style={{ backgroundColor: '#1976d2', color: 'white' }}>
-                <th style={tableHeaderStyle}>UserRole ID</th>
+                <th style={tableHeaderStyle}>Assignment ID</th>
                 <th style={tableHeaderStyle}>User ID</th>
                 <th style={tableHeaderStyle}>Role ID</th>
-                {userRoles.some(ur => ur.Username) && (
-                  <th style={tableHeaderStyle}>Username</th>
-                )}
-                {userRoles.some(ur => ur.RoleName) && (
-                  <th style={tableHeaderStyle}>Role Name</th>
-                )}
                 <th style={tableHeaderStyle}>Created By</th>
                 <th style={tableHeaderStyle}>Created At</th>
                 <th style={tableHeaderStyle}>Modified By</th>
@@ -100,35 +105,64 @@ export default function UserRoleList({ onEdit }: UserRoleListProps) {
             <tbody>
               {userRoles.map((userRole) => (
                 <tr key={userRole.UserRoleId} style={{ borderBottom: '1px solid #ddd' }}>
-                  <td style={tableCellStyle}>{userRole.UserRoleId}</td>
-                  <td style={tableCellStyle}>{userRole.UserId}</td>
-                  <td style={tableCellStyle}>{userRole.RoleId}</td>
-                  {userRole.Username && (
-                    <td style={tableCellStyle}>
-                      <strong>{userRole.Username}</strong>
-                    </td>
-                  )}
-                  {userRole.RoleName && (
-                    <td style={tableCellStyle}>
-                      <span style={{
-                        padding: '4px 8px',
-                        backgroundColor: '#e3f2fd',
-                        color: '#1976d2',
+                  <td style={tableCellStyle}>
+                    <strong style={{ color: '#1976d2', fontSize: '16px' }}>
+                      {userRole.UserRoleId}
+                    </strong>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '18px' }}>👤</span>
+                      <span style={{ 
+                        backgroundColor: '#e3f2fd', 
+                        padding: '6px 12px', 
                         borderRadius: '4px',
-                        fontSize: '12px',
                         fontWeight: 'bold',
+                        fontSize: '14px'
                       }}>
-                        {userRole.RoleName}
+                        {getUserName(userRole.UserId)}
                       </span>
-                    </td>
-                  )}
-                  <td style={tableCellStyle}>{userRole.CreatedBy || '-'}</td>
+                    </div>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '18px' }}>🎭</span>
+                      <span style={{ 
+                        backgroundColor: '#f3e5f5', 
+                        padding: '6px 12px', 
+                        borderRadius: '4px',
+                        fontWeight: 'bold',
+                        fontSize: '14px'
+                      }}>
+                        {getRoleName(userRole.RoleId)}
+                      </span>
+                    </div>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <span style={{ 
+                      backgroundColor: '#e3f2fd', 
+                      padding: '4px 8px', 
+                      borderRadius: '4px',
+                      fontSize: '12px'
+                    }}>
+                      {getUserName(userRole.CreatedBy)}
+                    </span>
+                  </td>
                   <td style={tableCellStyle}>
                     <span style={{ fontSize: '13px', color: '#666' }}>
                       {formatDate(userRole.CreatedAt)}
                     </span>
                   </td>
-                  <td style={tableCellStyle}>{userRole.ModifiyBy || '-'}</td>
+                  <td style={tableCellStyle}>
+                    <span style={{ 
+                      backgroundColor: '#fff3e0', 
+                      padding: '4px 8px', 
+                      borderRadius: '4px',
+                      fontSize: '12px'
+                    }}>
+                      {getUserName(userRole.ModifiyBy)}
+                    </span>
+                  </td>
                   <td style={tableCellStyle}>
                     <span style={{ fontSize: '13px', color: '#666' }}>
                       {formatDate(userRole.ModifiyAt)}

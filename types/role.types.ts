@@ -1,28 +1,29 @@
-// Define Role types based on your ACTUAL API structure
+// types/role.types.ts
+// Define Role types based on your database structure
 
 export interface Role {
   RoleId: number;
   RoleName: string;
-  CreatedBy: number;  // Changed to number
+  CreatedBy: number;
   CreatedAt: string;
-  ModifiyBy: number;  // Changed to number
+  ModifiyBy: number;
   ModifiyAt: string;
 }
 
 export interface CreateRoleRequest {
-    RoleId: number;
-    RoleName: string;
-    CreatedBy: number;  // Changed to number (UserId)
-    CreatedAt?: string;
-    ModifiyBy?: number;  // Changed to number (UserId)
-    ModifiyAt?: string;
+  RoleId: number;
+  RoleName: string;
+  CreatedBy: number;
+  CreatedAt?: string;
+  ModifiyBy?: number;
+  ModifiyAt?: string | null;
 }
 
 export interface UpdateRoleRequest {
-    RoleId: number;
-    RoleName: string;
-    CreatedBy?: number;  // Changed to number (UserId)
-    CreatedAt?: string;
-    ModifiyBy: number;  // Changed to number (UserId)
-    ModifiyAt?: string;
+  RoleId: number;
+  RoleName: string;
+  CreatedBy?: number;
+  CreatedAt?: string;
+  ModifiyBy: number;
+  ModifiyAt?: string | null;
 }
