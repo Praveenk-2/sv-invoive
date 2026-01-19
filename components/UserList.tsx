@@ -76,7 +76,7 @@ export default function UserList({ onEdit }: UserListProps) {
           No users found. Create your first user!
         </p>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
+        <div className='scroll-bar' style={{ overflowX: 'auto' }}>
           <table style={{ 
             width: '100%', 
             borderCollapse: 'collapse', 

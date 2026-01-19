@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import Dropdown from 'react-bootstrap/esm/Dropdown';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -30,164 +31,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // };
 
   // Simple menu items - direct links, no submenus
-  const menuItems = [
-    
-    {
-      name: 'Users',
-      href: '/dashboard/users',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-    
-    {
-      name: 'Items',
-      href: '/dashboard/items',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-    {
-      name: 'Items-Categories',
-      href: '/dashboard/categories',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-    {
-      name: 'Suppliers',
-      href: '/dashboard/suppliers',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-    {
-      name: 'Units',
-      href: '/dashboard/units',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-    {
-      name: 'Audit Logs',
-      href: '/dashboard/audit-logs',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-    {
-      name: 'Goods Receipts',
-      href: '/dashboard/goods-receipts',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-    {
-      name: 'Goods Receipt Items',
-      href: '/dashboard/goods-receipt-items',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-    {
-      name: 'Item Batches',
-      href: '/dashboard/item-batches',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-    {
-      name: 'Purchase Orders Items',
-      href: '/dashboard/purchase-order-items',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-    {
-      name: 'Purchase Orders',
-      href: '/dashboard/purchase-orders',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-    {
-      name: 'Stock',
-      href: '/dashboard/stock-extended',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-    {
-      name: 'Stocks Adjustments',
-      href: '/dashboard/adjustments',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-    {
-      name: 'Stock Ledger',
-      href: '/dashboard/stock-ledger',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-    {
-      name: 'Warehouse Management',
-      href: '/dashboard/warehouses',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-     {
-      name: 'Roles',
-      href: '/dashboard/roles',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-    {
-      name: 'User Roles',
-      href: '/dashboard/user-roles',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-    {
-      name: 'User Privileges',
-      href: '/dashboard/user-privileges',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-    {
-      name: 'Customer',
-      href: '/dashboard/customers',
-      icon: Settings,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      hoverBg: 'hover:bg-blue-100',
-    },
-  ];
-
-  const isActive = (href: string) => pathname.startsWith(href);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -206,46 +49,110 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       >
         {/* Header */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-          <h1 className="text-xl font-bold">Menu</h1>
+          {/* <h1 className="text-[18px]">Menu</h1> */}
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-gray-400 hover:text-blue-600"
-          >
+            className="lg:hidden text-gray-400 hover:text-blue-600">
             <X className="h-6 w-6" />
           </button>
         </div>
 
-        {/* User Info */}
-        {/* <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center">
-            <div className="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">
-              {user?.email?.charAt(0).toUpperCase() || 'U'}
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-900">{user?.email || 'User'}</p>
-              <p className="text-xs text-gray-500">{user?.role || 'Member'}</p>
-            </div>
-          </div>
-        </div> */}
-
         {/* Navigation Tabs */}
-        <nav className="flex-1 px-4 py-6 space-y-4 overflow-y-auto h-[600px] scroll-bar">
-          <div className="space-y-2">
-            {menuItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center px-4 py-3 rounded-lg transition-all hover:text-blue-400 ${isActive(item.href)
-                    ? `${item.bgColor} ${item.color} font-medium shadow-sm`
-                    : `text-white ${item.hoverBg}`
-                  }`}
-              >
-                {/* <item.icon className="h-5 w-5 mr-3" /> */}
-                <span className="font-medium">{item.name}</span>
-              </Link>
-            ))}
-          </div>
+        <nav className="flex-1 px-4 py-6 space-y-4 h-[600px] scroll-bar">
+          <Dropdown className="space-y-2" drop="end">
+            <Dropdown.Toggle id="dropdown-basic" className='m-head'>
+              Master
+            </Dropdown.Toggle>
+
+            <Dropdown.Menu>
+              <Dropdown.Item href="/dashboard/users">Users</Dropdown.Item>
+              <Dropdown.Item href="/dashboard/roles">Roles</Dropdown.Item>
+              <Dropdown.Item href="/dashboard/user-roles">User Role</Dropdown.Item>
+              <div className='p-0'>
+                <Dropdown drop="end">
+                  <Dropdown.Toggle className='dropdown-item' id="dropdown-basic">
+                    Item-Master
+                  </Dropdown.Toggle>
+
+                  <Dropdown.Menu>
+                    <Dropdown.Item href="/dashboard/items">Items</Dropdown.Item>
+                    <Dropdown.Item href="/dashboard/item-batches">Item Batches</Dropdown.Item>
+                    <Dropdown.Item href="/dashboard/categories">Item Category</Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </div>
+              <div>
+                <Dropdown drop="end">
+                  <Dropdown.Toggle className='dropdown-item' id="dropdown-basic">
+                    Customer master
+                  </Dropdown.Toggle>
+
+                  <Dropdown.Menu>
+                    <Dropdown.Item href="/dashboard/customers">Customer</Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </div>
+              <div>
+                <Dropdown drop="end">
+                  <Dropdown.Toggle className='dropdown-item' id="dropdown-basic">
+                    supplier
+                  </Dropdown.Toggle>
+
+                  <Dropdown.Menu>
+                    <Dropdown.Item href="/dashboard/units">units</Dropdown.Item>
+                    <Dropdown.Item href="/dashboard/suppliers">suppliers</Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </div>
+              <Dropdown.Item href="/dashboard/warehouses">Warehouse</Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
+          {/* Transction dropdown */}
+          <Dropdown className="space-y-2" drop="end">
+            <Dropdown.Toggle id="dropdown-basic" className='m-head'>
+              Transaction
+            </Dropdown.Toggle>
+
+            <Dropdown.Menu>
+              <div className='p-0'>
+                <Dropdown drop="end">
+                  <Dropdown.Toggle className='dropdown-item' id="dropdown-basic">
+                    Purchase
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
+                    <Dropdown.Item href="/dashboard/purchase-orders">Purchase Orders</Dropdown.Item>
+                    <Dropdown.Item href="/dashboard/purchase-order-items">Purchase order items</Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </div>
+              <Dropdown.Item href="#/action-3">Sales</Dropdown.Item>
+              <div>
+                <Dropdown drop="end">
+                  <Dropdown.Toggle className='dropdown-item' id="dropdown-basic">
+                    Goods
+                  </Dropdown.Toggle>
+
+                  <Dropdown.Menu>
+                    <Dropdown.Item href="/dashboard/goods-receipts">Goods receipt</Dropdown.Item>
+                    <Dropdown.Item href="/dashboard/goods-receipt-items">Goods receipt items</Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </div>
+              <div>
+                <Dropdown drop="end">
+                  <Dropdown.Toggle className='dropdown-item' id="dropdown-basic">
+                    Stock
+                  </Dropdown.Toggle>
+
+                  <Dropdown.Menu>
+                    <Dropdown.Item href="/dashboard/stock-extended">Stock</Dropdown.Item>
+                    <Dropdown.Item href="/dashboard/stock-ledger">Stock ledger</Dropdown.Item>
+                    <Dropdown.Item href="/dashboard/adjustments">Stock adjustment</Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </div>
+            </Dropdown.Menu>
+          </Dropdown>
         </nav>
 
         {/* Logout Button */}
@@ -285,7 +192,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main Content */}
       <div className="lg:pl-64">
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
+        {/* <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
           <div className="flex items-center justify-between h-16 px-6">
             <div className="flex items-center">
               <button
@@ -309,7 +216,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               })}
             </div>
           </div>
-        </header>
+        </header> */}
 
         {/* Page Content */}
         <main className="p-6">

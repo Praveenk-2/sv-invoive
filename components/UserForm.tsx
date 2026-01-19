@@ -279,30 +279,34 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
         </div>
 
         <div style={{ marginTop: '15px', marginBottom: '15px' }}>
-          <label style={{
-            display: 'flex',
-            alignItems: 'center',
-            cursor: 'pointer',
-            fontWeight: 'bold'
-          }}>
-            <input
-              type="checkbox"
-              name="IsActive"
-              checked={formData.IsActive}
-              onChange={handleChange}
-              style={{
-                marginRight: '10px',
-                width: '20px',
-                height: '20px',
-                cursor: 'pointer',
-              }}
-            />
+          <label htmlFor="IsActive" style={{ fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>
             Is Active
           </label>
-          <small style={{ color: '#666', fontSize: '12px', marginLeft: '30px' }}>
+          <select
+            id="IsActive"
+            name="IsActive"
+            value={formData.IsActive ? 'true' : 'false'}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                IsActive: e.target.value === 'true',
+              })}
+            style={{
+              width: 'auto',
+              padding: '5px 5px',
+              borderRadius: '6px',
+              border: '1px solid #ccc',
+              cursor: 'pointer',
+            }}>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+
+          <small style={{ color: '#666', fontSize: '12px', marginTop: '6px', display: 'block' }}>
             Active users can log in to the system
           </small>
         </div>
+
 
         <div style={{ display: 'flex', gap: '10px' }}>
           <button

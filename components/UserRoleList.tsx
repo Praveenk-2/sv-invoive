@@ -53,7 +53,7 @@ export default function UserRoleList({ onEdit }: UserRoleListProps) {
 
   if (loading) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
+      <div style={{textAlign: 'center' }}>
         Loading user role assignments...
       </div>
     );
