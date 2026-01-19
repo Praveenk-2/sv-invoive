@@ -11,76 +11,75 @@ interface UnitFormProps {
   onCancel?: () => void;
 }
 
+
 export default function UnitForm({ unitToEdit, onSuccess, onCancel }: UnitFormProps) {
-  const [formData, setFormData] = useState<CreateUnitRequest>({
+  const [formData, setFormData] = useState({
   UnitId: 0,
   UnitName: '',
   Abbreviation: '',
-  CreatedBy: 0,
-  CreatedAt: new Date().toISOString(),
-  ModifiyBy: 0,
-  ModifiyAt: '',
 });
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (unitToEdit) {
-      console.log('Editing unit:', unitToEdit);
-      setFormData({
-        UnitId: unitToEdit.UnitId,
-        UnitName: unitToEdit.UnitName,
-        Abbreviation: unitToEdit.Abbreviation,
-        CreatedBy: formData.CreatedBy,
-        CreatedAt: formData.CreatedAt,
-      });
-    } else {
-      setFormData({
-        UnitId: 0,
-        UnitName: '',
-        Abbreviation: '',
-        CreatedBy: formData.CreatedBy,
-        CreatedAt: formData.CreatedAt,
-      });
-    }
-  }, [unitToEdit]);
+  if (unitToEdit) {
+    setFormData({
+      UnitId: unitToEdit.UnitId,
+      UnitName: unitToEdit.UnitName,
+      Abbreviation: unitToEdit.Abbreviation,
+    });
+  } else {
+    setFormData({
+      UnitId: 0,
+      UnitName: '',
+      Abbreviation: '',
+    });
+  }
+}, [unitToEdit]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSubmitting(true);
+  e.preventDefault();
+  setError('');
+  setSubmitting(true);
 
-    console.log('Submitting form data:', formData);
+  try {
+    if (unitToEdit) {
+      // ✅ UPDATE PAYLOAD
+      const updatePayload = {
+        UnitId: unitToEdit.UnitId,
+        UnitName: formData.UnitName,
+        Abbreviation: formData.Abbreviation,
+        ModifiyBy: 1, // TODO: replace with logged-in userId
+        ModifiyAt: new Date().toISOString(),
+      };
 
-    try {
-      if (unitToEdit) {
-        console.log('Updating unit with ID:', unitToEdit.UnitId);
-        await unitService.updateUnit(unitToEdit.UnitId, formData);
-        alert('Unit updated successfully!');
-      } else {
-        console.log('Creating new unit');
-        await unitService.createUnit(formData);
-        alert('Unit created successfully!');
-      }
+      await unitService.updateUnit(unitToEdit.UnitId, updatePayload);
+      alert('Unit updated successfully!');
+    } else {
+      // ✅ CREATE PAYLOAD
+      const createPayload: CreateUnitRequest = {
+        UnitId: formData.UnitId,
+        UnitName: formData.UnitName,
+        Abbreviation: formData.Abbreviation,
+        CreatedBy: 1, // TODO: replace with logged-in userId
+        CreatedAt: new Date().toISOString(),
+      };
 
-      setFormData({
-        UnitId: 0,
-        UnitName: '',
-        Abbreviation: '',
-        CreatedBy: formData.CreatedBy,
-        CreatedAt: formData.CreatedAt,
-      });
-      
-      if (onSuccess) onSuccess();
-    } catch (err: any) {
-      console.error('Error submitting unit:', err);
-      const errorMessage = err?.response?.data?.message || err.message || 'Operation failed';
-      setError(errorMessage);
-    } finally {
-      setSubmitting(false);
+      await unitService.createUnit(createPayload);
+      alert('Unit created successfully!');
     }
-  };
+
+    setFormData({ UnitId: 0, UnitName: '', Abbreviation: '' });
+    onSuccess?.();
+  } catch (err: any) {
+    setError(err?.response?.data?.message || 'Operation failed');
+  } finally {
+    setSubmitting(false);
+  }
+};
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

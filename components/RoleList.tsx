@@ -111,10 +111,10 @@ export default function RoleList({ onEdit }: RoleListProps) {
               <tr style={{ backgroundColor: '#1976d2', color: 'white' }}>
                 <th style={tableHeaderStyle}>Role ID</th>
                 <th style={tableHeaderStyle}>Role Name</th>
-                <th style={tableHeaderStyle}>Created By</th>
+                {/* <th style={tableHeaderStyle}>Created By</th>
                 <th style={tableHeaderStyle}>Created At</th>
                 <th style={tableHeaderStyle}>Modified By</th>
-                <th style={tableHeaderStyle}>Modified At</th>
+                <th style={tableHeaderStyle}>Modified At</th> */}
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
@@ -130,7 +130,7 @@ export default function RoleList({ onEdit }: RoleListProps) {
                       <strong style={{ fontSize: '16px', color: '#524f4f' }}>{role.RoleName}</strong>
                     </div>
                   </td>
-                  <td style={tableCellStyle}>
+                  {/* <td style={tableCellStyle}>
                     <span style={{ 
                       backgroundColor: '#e3f2fd', 
                       padding: '4px 8px', 
@@ -159,7 +159,7 @@ export default function RoleList({ onEdit }: RoleListProps) {
                     <span style={{ fontSize: '13px', color: '#666' }}>
                       {formatDate(role.ModifiyAt)}
                     </span>
-                  </td>
+                  </td> */}
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       {onEdit && (

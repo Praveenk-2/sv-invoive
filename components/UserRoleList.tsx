@@ -5,7 +5,7 @@
 import React from 'react';
 import { useUserRoles } from '@/hooks/useUserRole';
 import { userRoleService } from '@/services/userRoleService';
-import { UserRole } from '@/types/userRole.types';
+import { UserRole } from '@/types/userrole.types';
 
 interface UserRoleListProps {
   onEdit?: (userRole: UserRole) => void;
@@ -95,10 +95,10 @@ export default function UserRoleList({ onEdit }: UserRoleListProps) {
                 <th style={tableHeaderStyle}>Assignment ID</th>
                 <th style={tableHeaderStyle}>User ID</th>
                 <th style={tableHeaderStyle}>Role ID</th>
-                <th style={tableHeaderStyle}>Created By</th>
+                {/* <th style={tableHeaderStyle}>Created By</th>
                 <th style={tableHeaderStyle}>Created At</th>
                 <th style={tableHeaderStyle}>Modified By</th>
-                <th style={tableHeaderStyle}>Modified At</th>
+                <th style={tableHeaderStyle}>Modified At</th> */}
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
@@ -113,32 +113,32 @@ export default function UserRoleList({ onEdit }: UserRoleListProps) {
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {/* <span style={{ fontSize: '18px' }}>👤</span> */}
-                      <span style={{ 
+                      {/* <span style={{ 
                         backgroundColor: '#e3f2fd', 
                         padding: '6px 12px', 
                         borderRadius: '4px',
                         fontWeight: 'bold',
                         fontSize: '14px'
-                      }}>
+                      }}> */}
                         {getUserName(userRole.UserId)}
-                      </span>
+                      {/* </span> */}
                     </div>
                   </td>
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {/* <span style={{ fontSize: '18px' }}>🎭</span> */}
-                      <span style={{ 
+                      {/* <span style={{ 
                         backgroundColor: '#f3e5f5', 
                         padding: '6px 12px', 
                         borderRadius: '4px',
                         fontWeight: 'bold',
-                        fontSize: '14px'
-                      }}>
+                        fontSize: '14px' */}
+                      {/* }}> */}
                         {getRoleName(userRole.RoleId)}
-                      </span>
+                      {/* </span> */}
                     </div>
                   </td>
-                  <td style={tableCellStyle}>
+                  {/* <td style={tableCellStyle}>
                     <span style={{ 
                       backgroundColor: '#e3f2fd', 
                       padding: '4px 8px', 
@@ -167,7 +167,7 @@ export default function UserRoleList({ onEdit }: UserRoleListProps) {
                     <span style={{ fontSize: '13px', color: '#666' }}>
                       {formatDate(userRole.ModifiyAt)}
                     </span>
-                  </td>
+                  </td> */}
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       {onEdit && (

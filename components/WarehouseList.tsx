@@ -91,10 +91,10 @@ export default function WarehouseList({ onEdit }: WarehouseListProps) {
                 <th style={tableHeaderStyle}>Warehouse Name</th>
                 <th style={tableHeaderStyle}>Location</th>
                 <th style={tableHeaderStyle}>Status</th>
-                <th style={tableHeaderStyle}>Created By</th>
+                {/* <th style={tableHeaderStyle}>Created By</th>
                 <th style={tableHeaderStyle}>Created At</th>
                 <th style={tableHeaderStyle}>Modified By</th>
-                <th style={tableHeaderStyle}>Modified At</th>
+                <th style={tableHeaderStyle}>Modified At</th> */}
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
@@ -128,7 +128,7 @@ export default function WarehouseList({ onEdit }: WarehouseListProps) {
                       {warehouse.IsActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
-                  <td style={tableCellStyle}>
+                  {/* <td style={tableCellStyle}>
                     <span style={{ 
                       backgroundColor: '#e3f2fd', 
                       padding: '4px 8px', 
@@ -157,7 +157,7 @@ export default function WarehouseList({ onEdit }: WarehouseListProps) {
                     <span style={{ fontSize: '13px', color: '#666' }}>
                       {formatDate(warehouse.ModifiyAt)}
                     </span>
-                  </td>
+                  </td> */}
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       {onEdit && (

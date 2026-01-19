@@ -88,10 +88,10 @@ export default function UnitList({ onEdit }: UnitListProps) {
                 <th style={tableHeaderStyle}>Unit ID</th>
                 <th style={tableHeaderStyle}>Unit Name</th>
                 <th style={tableHeaderStyle}>Abbreviation</th>
-                <th style={tableHeaderStyle}>Created By</th>
+                {/* <th style={tableHeaderStyle}>Created By</th>
                 <th style={tableHeaderStyle}>Created At</th>
                 <th style={tableHeaderStyle}>Modified By</th>
-                <th style={tableHeaderStyle}>Modified At</th>
+                <th style={tableHeaderStyle}>Modified At</th> */}
 
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
@@ -114,7 +114,7 @@ export default function UnitList({ onEdit }: UnitListProps) {
                       {unit.Abbreviation}
                     </span>
                   </td>
-                  <td style={tableCellStyle}>
+                  {/* <td style={tableCellStyle}>
                     <span style={{ backgroundColor: '#e3f2fd', 
                       padding: '4px 8px', 
                       borderRadius: '4px',
@@ -122,8 +122,8 @@ export default function UnitList({ onEdit }: UnitListProps) {
                     }}>
                       {getUserName(unit.CreatedBy)}
                     </span>
-                  </td>
-                  <td style={tableCellStyle}>
+                  </td> */}
+                  {/* <td style={tableCellStyle}>
                     <span style={{ fontSize: '13px', color: '#666' }}>
                       {formatDate(unit.CreatedAt)}
                     </span>
@@ -133,7 +133,7 @@ export default function UnitList({ onEdit }: UnitListProps) {
                   </td>
                   <td style={tableCellStyle}>
                     <span style={{ fontSize: '13px', color: '#666' }}>{formatDate(unit.ModifiyAt)}</span>
-                  </td>
+                  </td> */}
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       {onEdit && (

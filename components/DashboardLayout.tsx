@@ -177,6 +177,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       bgColor: 'bg-blue-50',
       hoverBg: 'hover:bg-blue-100',
     },
+    {
+      name: 'Customer',
+      href: '/dashboard/customers',
+      icon: Settings,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      hoverBg: 'hover:bg-blue-100',
+    },
   ];
 
   const isActive = (href: string) => pathname.startsWith(href);

@@ -112,7 +112,7 @@ export default function StockAdjustmentsList({ onEdit }: StockAdjustmentsListPro
           No stock adjustments found. Create your first stock adjustment!
         </p>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
+        <div style={{ overflowX: 'auto' }} className='scroll-bar'>
           <table style={{ 
             width: '100%', 
             borderCollapse: 'collapse', 
@@ -128,10 +128,10 @@ export default function StockAdjustmentsList({ onEdit }: StockAdjustmentsListPro
                 <th style={tableHeaderStyle}>Type</th>
                 <th style={tableHeaderStyle}>Quantity</th>
                 <th style={tableHeaderStyle}>Reason</th>
-                <th style={tableHeaderStyle}>Adjusted By</th>
+                {/* <th style={tableHeaderStyle}>Adjusted By</th>
                 <th style={tableHeaderStyle}>Adjusted Date</th>
                 <th style={tableHeaderStyle}>Created By</th>
-                <th style={tableHeaderStyle}>Modified By</th>
+                <th style={tableHeaderStyle}>Modified By</th> */}
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
@@ -183,7 +183,7 @@ export default function StockAdjustmentsList({ onEdit }: StockAdjustmentsListPro
                       {adjustment.Reason}
                     </div>
                   </td>
-                  <td style={tableCellStyle}>
+                  {/* <td style={tableCellStyle}>
                     <span style={{ 
                       backgroundColor: '#fff3e0', 
                       padding: '4px 8px', 
@@ -217,7 +217,7 @@ export default function StockAdjustmentsList({ onEdit }: StockAdjustmentsListPro
                     }}>
                       {getUserName(adjustment.ModifiyBy)}
                     </span>
-                  </td>
+                  </td> */}
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       {onEdit && (

@@ -117,10 +117,10 @@ export default function GoodsReceiptList({ onEdit }: GoodsReceiptListProps) {
                 <th style={tableHeaderStyle}>Received Date</th>
                 <th style={tableHeaderStyle}>Received By</th>
                 <th style={tableHeaderStyle}>Status</th>
-                <th style={tableHeaderStyle}>Created By</th>
+                {/* <th style={tableHeaderStyle}>Created By</th>
                 <th style={tableHeaderStyle}>Created At</th>
                 <th style={tableHeaderStyle}>Modified By</th>
-                <th style={tableHeaderStyle}>Modified At</th>
+                <th style={tableHeaderStyle}>Modified At</th> */}
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
@@ -161,7 +161,7 @@ export default function GoodsReceiptList({ onEdit }: GoodsReceiptListProps) {
                       {grn.Status}
                     </span>
                   </td>
-                  <td style={tableCellStyle}>
+                  {/* <td style={tableCellStyle}>
                     <span style={{ 
                       backgroundColor: '#f3e5f5', 
                       padding: '4px 8px', 
@@ -190,7 +190,7 @@ export default function GoodsReceiptList({ onEdit }: GoodsReceiptListProps) {
                     <span style={{ fontSize: '13px', color: '#666' }}>
                       {formatDate(grn.ModifiyAt)}
                     </span>
-                  </td>
+                  </td> */}
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       {onEdit && (

@@ -122,10 +122,10 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
                 <th style={tableHeaderStyle}>Email</th>
                 <th style={tableHeaderStyle}>GST Number</th>
                 <th style={tableHeaderStyle}>Status</th>
-                <th style={tableHeaderStyle}>Created At</th>
+                {/* <th style={tableHeaderStyle}>Created At</th>
                 <th style={tableHeaderStyle}>Created By</th>
                 <th style={tableHeaderStyle}>Modified By</th>
-                <th style={tableHeaderStyle}>Modified At</th>
+                <th style={tableHeaderStyle}>Modified At</th> */}
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
@@ -180,7 +180,7 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
                       {supplier.IsActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
-                  <td style={tableCellStyle}>
+                  {/* <td style={tableCellStyle}>
                     <span style={{ fontSize: '13px', color: '#666' }}>
                       {formatDate(supplier.CreatedAt)}
                     </span>
@@ -209,7 +209,7 @@ export default function SupplierList({ onEdit }: SupplierListProps) {
                     <span style={{ fontSize: '13px', color: '#666' }}>
                       {formatDate(supplier.ModifiyAt)}
                     </span>
-                  </td>
+                  </td> */}
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       {onEdit && (

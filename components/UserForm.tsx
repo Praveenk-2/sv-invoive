@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { userService } from '@/services/userService';
 import { User } from '@/types/user.types';
 import { useAuth } from '@/context/AuthContext';
+import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 
 interface UserFormProps {
   userToEdit?: User | null;
@@ -26,8 +27,12 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
     ModifiyBy: 0,
     ModifiyAt: null as string | null,  // null instead of empty string
   });
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
 
   useEffect(() => {
     if (userToEdit) {
@@ -61,6 +66,18 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // 🔐 Confirm password validation
+    if (!userToEdit && formData.PasswordHash !== confirmPassword) {
+      setError('Password and Confirm Password do not match');
+      return;
+    }
+
+    if (userToEdit && formData.PasswordHash && formData.PasswordHash !== confirmPassword) {
+      setError('Password and Confirm Password do not match');
+      return;
+    }
+
     setSubmitting(true);
 
     console.log('Form data before sending:', formData);
@@ -114,6 +131,7 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
       ...formData,
       [name]: type === 'checkbox' ? checked : name === 'UserId' ? Number(value) : value,
     });
+    setConfirmPassword('');
   };
 
   return (
@@ -139,7 +157,7 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
 
       <form onSubmit={handleSubmit}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-          <div>
+          {/* <div>
             <label htmlFor="UserId" style={labelStyle}>
               User ID *
             </label>
@@ -162,7 +180,7 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
                 ID cannot be changed
               </small>
             )}
-          </div>
+          </div> */}
 
           <div>
             <label htmlFor="Username" style={labelStyle}>
@@ -196,24 +214,68 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
             />
           </div>
 
-          <div>
+          <div style={{ position: 'relative' }}>
             <label htmlFor="PasswordHash" style={labelStyle}>
               Password {userToEdit ? '(leave blank to keep)' : '*'}
             </label>
+
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               id="PasswordHash"
               name="PasswordHash"
               value={formData.PasswordHash}
               onChange={handleChange}
               required={!userToEdit}
-              style={inputStyle}
+              style={{ ...inputStyle, paddingRight: '42px' }}
               placeholder="Enter password"
             />
+
+            <span
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: 'absolute',
+                right: '12px',
+                top: '38px',
+                cursor: 'pointer',
+                color: '#555',
+              }}
+            >
+              {showPassword ? <IoMdEyeOff size={22} /> : <IoMdEye size={22} />}
+            </span>
+
             <small style={{ color: '#666', fontSize: '12px' }}>
               {userToEdit ? 'Only fill to change password' : 'Min 6 characters'}
             </small>
           </div>
+
+          <div style={{ position: 'relative' }}>
+            <label style={labelStyle}>
+              Confirm Password {userToEdit ? '(leave blank to keep)' : '*'}
+            </label>
+
+            <input
+              type={showConfirmPassword ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required={!userToEdit}
+              style={{ ...inputStyle, paddingRight: '42px' }}
+              placeholder="Re-enter password"
+            />
+
+            <span
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              style={{
+                position: 'absolute',
+                right: '12px',
+                top: '38px',
+                cursor: 'pointer',
+                color: '#555',
+              }}
+            >
+              {showConfirmPassword ? <IoMdEyeOff size={22} /> : <IoMdEye size={22} />}
+            </span>
+          </div>
+
         </div>
 
         <div style={{ marginTop: '15px', marginBottom: '15px' }}>

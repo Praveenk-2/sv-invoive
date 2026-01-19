@@ -191,7 +191,7 @@ export default function StockExtendedList({ onEdit }: StockExtendedListProps) {
           No stock records found. Create your first stock record!
         </p>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
+        <div style={{ overflowX: 'auto' }} className='scroll-bar'>
           <table style={{ 
             width: '100%', 
             borderCollapse: 'collapse', 
@@ -207,10 +207,10 @@ export default function StockExtendedList({ onEdit }: StockExtendedListProps) {
                 <th style={tableHeaderStyle}>Quantity</th>
                 <th style={tableHeaderStyle}>Status</th>
                 <th style={tableHeaderStyle}>Last Updated</th>
-                <th style={tableHeaderStyle}>Created By</th>
+                {/* <th style={tableHeaderStyle}>Created By</th>
                 <th style={tableHeaderStyle}>Created At</th>
                 <th style={tableHeaderStyle}>Modified By</th>
-                <th style={tableHeaderStyle}>Modified At</th>
+                <th style={tableHeaderStyle}>Modified At</th> */}
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
@@ -257,7 +257,7 @@ export default function StockExtendedList({ onEdit }: StockExtendedListProps) {
                       {formatDate(stock.LastUpdated)}
                     </span>
                   </td>
-                  <td style={tableCellStyle}>
+                  {/* <td style={tableCellStyle}>
                     <span style={{ 
                       backgroundColor: '#e8f5e9', 
                       padding: '4px 8px', 
@@ -286,7 +286,7 @@ export default function StockExtendedList({ onEdit }: StockExtendedListProps) {
                     <span style={{ fontSize: '12px', color: '#666' }}>
                       {formatDate(stock.ModifiyAt)}
                     </span>
-                  </td>
+                  </td> */}
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       {onEdit && (

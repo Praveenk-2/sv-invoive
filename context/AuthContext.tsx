@@ -1,4 +1,3 @@
-// context/AuthContext.tsx
 // Manages authentication state globally
 'use client';
 

@@ -118,10 +118,10 @@ export default function PurchaseOrderItemsList({ onEdit }: PurchaseOrderItemsLis
                 <th style={tableHeaderStyle}>Quantity</th>
                 <th style={tableHeaderStyle}>Unit Price</th>
                 <th style={tableHeaderStyle}>Total</th>
-                <th style={tableHeaderStyle}>Created By</th>
+                {/* <th style={tableHeaderStyle}>Created By</th>
                 <th style={tableHeaderStyle}>Created At</th>
                 <th style={tableHeaderStyle}>Modified By</th>
-                <th style={tableHeaderStyle}>Modified At</th>
+                <th style={tableHeaderStyle}>Modified At</th> */}
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
@@ -170,7 +170,7 @@ export default function PurchaseOrderItemsList({ onEdit }: PurchaseOrderItemsLis
                       {formatCurrency(item.Total)}
                     </span>
                   </td>
-                  <td style={tableCellStyle}>
+                  {/* <td style={tableCellStyle}>
                     <span style={{ 
                       backgroundColor: '#e8f5e9', 
                       padding: '4px 8px', 
@@ -199,7 +199,7 @@ export default function PurchaseOrderItemsList({ onEdit }: PurchaseOrderItemsLis
                     <span style={{ fontSize: '13px', color: '#666' }}>
                       {formatDate(item.ModifiyAt)}
                     </span>
-                  </td>
+                  </td> */}
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       {onEdit && (

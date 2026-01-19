@@ -18,7 +18,6 @@ export function middleware(request: NextRequest) {
   // Public routes - login, register, etc.
   const isPublicRoute = 
     path === '/login' || 
-    path === '/register' ||
     path === '/';
 
   // Protected route-la token illa-na login-ku redirect

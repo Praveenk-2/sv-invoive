@@ -140,10 +140,10 @@ export default function ItemBatchesList({ onEdit }: ItemBatchesListProps) {
                 <th style={tableHeaderStyle}>Batch Number</th>
                 <th style={tableHeaderStyle}>Quantity</th>
                 <th style={tableHeaderStyle}>Expiry Date</th>
-                <th style={tableHeaderStyle}>Created By</th>
+                {/* <th style={tableHeaderStyle}>Created By</th>
                 <th style={tableHeaderStyle}>Created At</th>
                 <th style={tableHeaderStyle}>Modified By</th>
-                <th style={tableHeaderStyle}>Modified At</th>
+                <th style={tableHeaderStyle}>Modified At</th> */}
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
@@ -233,7 +233,7 @@ export default function ItemBatchesList({ onEdit }: ItemBatchesListProps) {
                       <span style={{ color: '#999' }}>-</span>
                     )}
                   </td>
-                  <td style={tableCellStyle}>
+                  {/* <td style={tableCellStyle}>
                     <span style={{ 
                       backgroundColor: '#e8f5e9', 
                       padding: '4px 8px', 
@@ -262,7 +262,7 @@ export default function ItemBatchesList({ onEdit }: ItemBatchesListProps) {
                     <span style={{ fontSize: '13px', color: '#666' }}>
                       {formatDate(batch.ModifiyAt)}
                     </span>
-                  </td>
+                  </td> */}
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       {onEdit && (

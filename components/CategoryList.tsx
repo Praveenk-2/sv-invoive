@@ -90,10 +90,10 @@ export default function CategoryList({ onEdit }: CategoryListProps) {
                 <th style={tableHeaderStyle}>Category Name</th>
                 <th style={tableHeaderStyle}>Description</th>
                 <th style={tableHeaderStyle}>Status</th>
-                <th style={tableHeaderStyle}>Created At</th>
+                {/* <th style={tableHeaderStyle}>Created At</th>
                 <th style={tableHeaderStyle}>Created By</th>
                 <th style={tableHeaderStyle}>Modified By</th>
-                <th style={tableHeaderStyle}>Modified At</th>
+                <th style={tableHeaderStyle}>Modified At</th> */}
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
@@ -127,7 +127,7 @@ export default function CategoryList({ onEdit }: CategoryListProps) {
                       {category.IsActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
-                  <td style={tableCellStyle}>
+                  {/* <td style={tableCellStyle}>
                     <span style={{ fontSize: '13px', color: '#666' }}>
                       {formatDate(category.CreatedAt)}
                     </span>
@@ -156,7 +156,7 @@ export default function CategoryList({ onEdit }: CategoryListProps) {
                     <span style={{ fontSize: '13px', color: '#666' }}>
                       {formatDate(category.ModifiyAt)}
                     </span>
-                  </td>
+                  </td> */}
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       {onEdit && (

@@ -119,10 +119,10 @@ export default function StockLedgerList({ onEdit }: StockLedgerListProps) {
                 <th style={tableHeaderStyle}>Reference Type</th>
                 <th style={tableHeaderStyle}>Reference ID</th>
                 <th style={tableHeaderStyle}>Transaction Date</th>
-                <th style={tableHeaderStyle}>Created By</th>
+                {/* <th style={tableHeaderStyle}>Created By</th>
                 <th style={tableHeaderStyle}>Created At</th>
                 <th style={tableHeaderStyle}>Modified By</th>
-                <th style={tableHeaderStyle}>Modified At</th>
+                <th style={tableHeaderStyle}>Modified At</th> */}
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
@@ -183,7 +183,7 @@ export default function StockLedgerList({ onEdit }: StockLedgerListProps) {
                       {formatDate(ledger.TransactionDate)}
                     </span>
                   </td>
-                  <td style={tableCellStyle}>
+                  {/* <td style={tableCellStyle}>
                     <span style={{ 
                       backgroundColor: '#e3f2fd', 
                       padding: '4px 8px', 
@@ -212,7 +212,7 @@ export default function StockLedgerList({ onEdit }: StockLedgerListProps) {
                     <span style={{ fontSize: '13px', color: '#666' }}>
                       {formatDate(ledger.ModifiyAt)}
                     </span>
-                  </td>
+                  </td> */}
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       {onEdit && (

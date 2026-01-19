@@ -114,10 +114,10 @@ export default function AuditLogList({ onEdit }: AuditLogListProps) {
                 <th style={tableHeaderStyle}>Action</th>
                 <th style={tableHeaderStyle}>Old Value</th>
                 <th style={tableHeaderStyle}>New Value</th>
-                <th style={tableHeaderStyle}>Changed By</th>
+                {/* <th style={tableHeaderStyle}>Changed By</th>
                 <th style={tableHeaderStyle}>Changed At</th>
                 <th style={tableHeaderStyle}>Created By</th>
-                <th style={tableHeaderStyle}>Modified By</th>
+                <th style={tableHeaderStyle}>Modified By</th> */}
                 <th style={tableHeaderStyle}>Actions</th>
               </tr>
             </thead>
@@ -156,7 +156,7 @@ export default function AuditLogList({ onEdit }: AuditLogListProps) {
                       {log.NewValue || '-'}
                     </div>
                   </td>
-                  <td style={tableCellStyle}>
+                  {/* <td style={tableCellStyle}>
                     <span style={{ 
                       backgroundColor: '#e3f2fd', 
                       padding: '4px 8px', 
@@ -190,7 +190,7 @@ export default function AuditLogList({ onEdit }: AuditLogListProps) {
                     }}>
                       {getUserName(log.ModifiyBy)}
                     </span>
-                  </td>
+                  </td> */}
                   <td style={tableCellStyle}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       {onEdit && (
