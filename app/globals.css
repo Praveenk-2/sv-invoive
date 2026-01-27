@@ -56,7 +56,7 @@ a{
   display: none !important;
 } */
 .m-head {
-  font-size: 22px !important; 
+  font-size: 20px !important; 
   font-weight: 600 !important; 
   background-color: unset !important; 
   border: unset !important;
@@ -91,4 +91,8 @@ a{
     align-items: end;
     margin-top: 10px;
     float: right;
+}
+.dropdown-item.show {
+  background-color: #448aff !important;
+  color: white !important;
 }

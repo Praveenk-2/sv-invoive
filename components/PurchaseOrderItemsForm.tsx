@@ -29,6 +29,14 @@ export default function PurchaseOrderItemsForm({ itemToEdit, onSuccess, onCancel
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  // Field-specific errors
+  const [fieldErrors, setFieldErrors] = useState({
+    POId: '',
+    ItemId: '',
+    Quantity: '',
+    UnitPrice: '',
+  });
+
   useEffect(() => {
     if (itemToEdit) {
       console.log('Editing purchase order item:', itemToEdit);
@@ -58,6 +66,14 @@ export default function PurchaseOrderItemsForm({ itemToEdit, onSuccess, onCancel
         ModifiyAt: null,
       });
     }
+    // Clear errors when switching modes
+    setFieldErrors({
+      POId: '',
+      ItemId: '',
+      Quantity: '',
+      UnitPrice: '',
+    });
+    setError('');
   }, [itemToEdit, currentUser]);
 
   // Auto-calculate total when quantity or unit price changes
@@ -68,9 +84,76 @@ export default function PurchaseOrderItemsForm({ itemToEdit, onSuccess, onCancel
     }
   }, [formData.Quantity, formData.UnitPrice]);
 
+  // Validation functions
+  const validatePOId = (poId: number): string => {
+    if (!poId || poId === 0) return 'Purchase Order ID is required';
+    if (poId < 1) return 'Purchase Order ID must be a positive number';
+    return '';
+  };
+
+  const validateItemId = (itemId: number): string => {
+    if (!itemId || itemId === 0) return 'Item ID is required';
+    if (itemId < 1) return 'Item ID must be a positive number';
+    return '';
+  };
+
+  const validateQuantity = (quantity: number): string => {
+    if (quantity === 0) return 'Quantity is required';
+    if (quantity < 1) return 'Quantity must be at least 1';
+    return '';
+  };
+
+  const validateUnitPrice = (price: number): string => {
+    if (price === 0) return 'Unit price is required';
+    if (price < 0) return 'Unit price cannot be negative';
+    return '';
+  };
+
+  const handleBlur = (field: string) => {
+    let errorMsg = '';
+    
+    switch (field) {
+      case 'POId':
+        errorMsg = validatePOId(formData.POId);
+        break;
+      case 'ItemId':
+        errorMsg = validateItemId(formData.ItemId);
+        break;
+      case 'Quantity':
+        errorMsg = validateQuantity(formData.Quantity);
+        break;
+      case 'UnitPrice':
+        errorMsg = validateUnitPrice(formData.UnitPrice);
+        break;
+    }
+
+    setFieldErrors(prev => ({
+      ...prev,
+      [field]: errorMsg
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Validate all fields before submission
+    const errors = {
+      POId: validatePOId(formData.POId),
+      ItemId: validateItemId(formData.ItemId),
+      Quantity: validateQuantity(formData.Quantity),
+      UnitPrice: validateUnitPrice(formData.UnitPrice),
+    };
+
+    setFieldErrors(errors);
+
+    // Check if there are any validation errors
+    const hasErrors = Object.values(errors).some(err => err !== '');
+    if (hasErrors) {
+      setError('Please fix all validation errors before submitting');
+      return;
+    }
+
     setSubmitting(true);
 
     console.log('Form data before sending:', formData);
@@ -103,14 +186,43 @@ export default function PurchaseOrderItemsForm({ itemToEdit, onSuccess, onCancel
         ModifiyBy: 0,
         ModifiyAt: null,
       });
+      setFieldErrors({
+        POId: '',
+        ItemId: '',
+        Quantity: '',
+        UnitPrice: '',
+      });
 
       if (onSuccess) onSuccess();
     } catch (err: any) {
       console.error('Error submitting purchase order item:', err);
       console.error('Error response:', err?.response?.data);
-      const errorMessage = err?.response?.data?.errors
-        ? Object.values(err.response.data.errors).flat().join(', ')
-        : err?.response?.data?.message || err.message || 'Operation failed';
+      
+      // Handle different types of errors with user-friendly messages
+      let errorMessage = '';
+      
+      if (err?.response?.status === 404) {
+        errorMessage = 'Purchase Order ID or Item ID not found in the database. Please verify the IDs and try again.';
+      } else if (err?.response?.status === 409) {
+        errorMessage = 'This item already exists in the purchase order. Please check and try again.';
+      } else if (err?.response?.status === 500) {
+        errorMessage = 'Unable to save the purchase order item. Please verify that both Purchase Order ID and Item ID exist in the system.';
+      } else if (err?.response?.status === 400) {
+        // Bad request - validation error from server
+        if (err?.response?.data?.errors) {
+          const serverErrors = Object.values(err.response.data.errors).flat();
+          errorMessage = serverErrors.join(', ');
+        } else {
+          errorMessage = err?.response?.data?.message || 'Invalid data provided. Please check your entries.';
+        }
+      } else if (err?.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err?.message && !err.message.includes('status code')) {
+        errorMessage = err.message;
+      } else {
+        errorMessage = 'Unable to complete the operation. Please verify your data and try again.';
+      }
+      
       setError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -122,11 +234,19 @@ export default function PurchaseOrderItemsForm({ itemToEdit, onSuccess, onCancel
     setFormData({
       ...formData,
       [name]: name === 'POItemId' || name === 'POId' || name === 'ItemId' || name === 'Quantity'
-        ? Number(value)
+        ? Number(value) || 0
         : name === 'UnitPrice' || name === 'Total'
         ? parseFloat(value) || 0
         : value,
     });
+
+    // Clear field error when user starts typing
+    if (fieldErrors[name as keyof typeof fieldErrors]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
   };
 
   const formatCurrency = (amount: number) => {
@@ -159,32 +279,29 @@ export default function PurchaseOrderItemsForm({ itemToEdit, onSuccess, onCancel
 
       <form onSubmit={handleSubmit}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-          <div>
-            <label htmlFor="POItemId" style={labelStyle}>
-              PO Item ID *
-            </label>
-            <input
-              type="number"
-              id="POItemId"
-              name="POItemId"
-              value={formData.POItemId}
-              onChange={handleChange}
-              required
-              disabled={!!itemToEdit}
-              style={{
-                ...inputStyle,
-                backgroundColor: itemToEdit ? '#e0e0e0' : 'white',
-              }}
-              placeholder="e.g., 1"
-            />
-            {itemToEdit && (
-              <small style={{ color: '#666', fontSize: '12px' }}>
+          {itemToEdit && (
+            <div>
+              <label htmlFor="POItemId" style={labelStyle}>
+                PO Item ID
+              </label>
+              <input
+                type="number"
+                id="POItemId"
+                name="POItemId"
+                value={formData.POItemId}
+                disabled
+                style={{
+                  ...inputStyle,
+                  backgroundColor: '#e0e0e0',
+                }}
+              />
+              <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
                 ID cannot be changed
               </small>
-            )}
-          </div>
+            </div>
+          )}
 
-          <div>
+          <div style={{ gridColumn: itemToEdit ? 'auto' : 'span 2' }}>
             <label htmlFor="POId" style={labelStyle}>
               Purchase Order ID *
             </label>
@@ -192,12 +309,23 @@ export default function PurchaseOrderItemsForm({ itemToEdit, onSuccess, onCancel
               type="number"
               id="POId"
               name="POId"
-              value={formData.POId}
+              value={formData.POId || ''}
               onChange={handleChange}
+              onBlur={() => handleBlur('POId')}
               required
-              style={inputStyle}
+              min="1"
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.POId ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., 1"
             />
+            {fieldErrors.POId && (
+              <small style={errorTextStyle}>{fieldErrors.POId}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Select the purchase order
+            </small>
           </div>
 
           <div>
@@ -208,12 +336,23 @@ export default function PurchaseOrderItemsForm({ itemToEdit, onSuccess, onCancel
               type="number"
               id="ItemId"
               name="ItemId"
-              value={formData.ItemId}
+              value={formData.ItemId || ''}
               onChange={handleChange}
+              onBlur={() => handleBlur('ItemId')}
               required
-              style={inputStyle}
+              min="1"
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.ItemId ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., 101"
             />
+            {fieldErrors.ItemId && (
+              <small style={errorTextStyle}>{fieldErrors.ItemId}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Select the item to order
+            </small>
           </div>
 
           <div>
@@ -224,13 +363,23 @@ export default function PurchaseOrderItemsForm({ itemToEdit, onSuccess, onCancel
               type="number"
               id="Quantity"
               name="Quantity"
-              value={formData.Quantity}
+              value={formData.Quantity || ''}
               onChange={handleChange}
+              onBlur={() => handleBlur('Quantity')}
               required
               min="1"
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.Quantity ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., 100"
             />
+            {fieldErrors.Quantity && (
+              <small style={errorTextStyle}>{fieldErrors.Quantity}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Number of units to order
+            </small>
           </div>
 
           <div>
@@ -241,14 +390,24 @@ export default function PurchaseOrderItemsForm({ itemToEdit, onSuccess, onCancel
               type="number"
               id="UnitPrice"
               name="UnitPrice"
-              value={formData.UnitPrice}
+              value={formData.UnitPrice || ''}
               onChange={handleChange}
+              onBlur={() => handleBlur('UnitPrice')}
               required
-              min="0"
+              min="0.01"
               step="0.01"
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.UnitPrice ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., 25.50"
             />
+            {fieldErrors.UnitPrice && (
+              <small style={errorTextStyle}>{fieldErrors.UnitPrice}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Price per unit
+            </small>
           </div>
 
           <div>
@@ -269,8 +428,8 @@ export default function PurchaseOrderItemsForm({ itemToEdit, onSuccess, onCancel
               }}
               placeholder="0.00"
             />
-            <small style={{ color: '#666', fontSize: '12px' }}>
-              Automatically calculated
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Automatically calculated (Quantity × Unit Price)
             </small>
           </div>
         </div>
@@ -364,4 +523,12 @@ const inputStyle: React.CSSProperties = {
   fontSize: '16px',
   border: '1px solid #ccc',
   borderRadius: '4px',
+};
+
+const errorTextStyle: React.CSSProperties = {
+  color: '#c62828',
+  fontSize: '12px',
+  display: 'block',
+  marginTop: '4px',
+  fontWeight: '500'
 };

@@ -15,11 +15,11 @@ export default function CustomersList({ onEdit }: CustomersListProps) {
   const handleDelete = async (id: number) => {
     console.log('Deleting customer with ID:', id);
     
-    if (!confirm('Are you sure you want to delete this customer?')) return;
+    // if (!confirm('Are you sure you want to delete this customer?')) return;
 
     try {
       await customerService.deleteCustomer(id);
-      alert('Customer deleted successfully!');
+      // alert('Customer deleted successfully!');
       refetch();
     } catch (err: any) {
       console.error('Error deleting customer:', err);
@@ -170,6 +170,41 @@ export default function CustomersList({ onEdit }: CustomersListProps) {
                     </a>
                   </td>
                   <td style={tableCellStyle}>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      {onEdit && (
+                        <button
+                          onClick={() => {
+                            console.log('Editing customer:', customer);
+                            onEdit(customer);
+                          }}
+                          style={{
+                            padding: '6px 12px',
+                            backgroundColor: '#1976d2',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Edit
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDelete(customer.CustomerId)}
+                        style={{
+                          padding: '6px 12px',
+                          backgroundColor: '#d32f2f',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                  <td style={tableCellStyle}>
                     <div style={{ 
                       maxWidth: '200px', 
                       overflow: 'hidden', 
@@ -229,41 +264,7 @@ export default function CustomersList({ onEdit }: CustomersListProps) {
                       {getUserName(customer.ModifiyBy)}
                     </span>
                   </td> */}
-                  <td style={tableCellStyle}>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                      {onEdit && (
-                        <button
-                          onClick={() => {
-                            console.log('Editing customer:', customer);
-                            onEdit(customer);
-                          }}
-                          style={{
-                            padding: '6px 12px',
-                            backgroundColor: '#1976d2',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          Edit
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleDelete(customer.CustomerId)}
-                        style={{
-                          padding: '6px 12px',
-                          backgroundColor: '#d32f2f',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+                  
                 </tr>
               ))}
             </tbody>

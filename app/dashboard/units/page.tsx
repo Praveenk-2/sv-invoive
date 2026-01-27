@@ -103,42 +103,12 @@ export default function UnitsPage() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div style={{
-              padding: '20px',
-              borderBottom: '1px solid #e0e0e0',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              position: 'sticky',
-              top: 0,
-              backgroundColor: 'white',
-              zIndex: 1,
-            }}>
-              <h2 style={{ margin: 0, color: '#1976d2' }}>
-                {editingUnit ? 'Edit Unit' : 'Create New Unit'}
-              </h2>
               <button
                 onClick={handleCancel}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '24px',
-                  cursor: 'pointer',
-                  color: '#666',
-                  padding: '0',
-                  width: '30px',
-                  height: '30px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '4px',
-                }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                className="absolute top-1 right-1 text-gray-500 hover:text-red-500 text-xl cursor-pointer"
               >
-                ×
+                ✕
               </button>
-            </div>
 
             {/* Modal Body */}
             <div style={{ padding: '20px' }}>

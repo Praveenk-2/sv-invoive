@@ -31,6 +31,16 @@ export default function StockAdjustmentsForm({ adjustmentToEdit, onSuccess, onCa
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  // Field-specific errors
+  const [fieldErrors, setFieldErrors] = useState({
+    ItemId: '',
+    WarehouseId: '',
+    AdjustmentType: '',
+    Quantity: '',
+    Reason: '',
+    AdjustedBy: '',
+  });
+
   useEffect(() => {
     if (adjustmentToEdit) {
       console.log('Editing stock adjustment:', adjustmentToEdit);
@@ -64,11 +74,110 @@ export default function StockAdjustmentsForm({ adjustmentToEdit, onSuccess, onCa
         ModifiyAt: null,
       });
     }
+    // Clear errors when switching modes
+    setFieldErrors({
+      ItemId: '',
+      WarehouseId: '',
+      AdjustmentType: '',
+      Quantity: '',
+      Reason: '',
+      AdjustedBy: '',
+    });
+    setError('');
   }, [adjustmentToEdit, currentUser]);
+
+  // Validation functions
+  const validateItemId = (itemId: number): string => {
+    if (!itemId || itemId === 0) return 'Item ID is required';
+    if (itemId < 1) return 'Item ID must be a positive number';
+    return '';
+  };
+
+  const validateWarehouseId = (warehouseId: number): string => {
+    if (!warehouseId || warehouseId === 0) return 'Warehouse ID is required';
+    if (warehouseId < 1) return 'Warehouse ID must be a positive number';
+    return '';
+  };
+
+  const validateAdjustmentType = (type: string): string => {
+    if (!type || type.trim() === '') return 'Adjustment type is required';
+    const validTypes = ['INCREASE', 'DECREASE', 'ADD', 'REMOVE', 'IN', 'OUT', 'CORRECTION', 'ADJUST', 'TRANSFER'];
+    if (!validTypes.includes(type)) return 'Please select a valid adjustment type';
+    return '';
+  };
+
+  const validateQuantity = (quantity: number): string => {
+    if (quantity === 0) return 'Quantity is required';
+    if (quantity < 1) return 'Quantity must be at least 1';
+    return '';
+  };
+
+  const validateReason = (reason: string): string => {
+    if (!reason || reason.trim() === '') return 'Reason is required';
+    if (reason.length < 10) return 'Reason must be at least 10 characters';
+    if (reason.length > 500) return 'Reason must not exceed 500 characters';
+    return '';
+  };
+
+  const validateAdjustedBy = (adjustedBy: number): string => {
+    if (!adjustedBy || adjustedBy === 0) return 'Adjusted By (User ID) is required';
+    if (adjustedBy < 1) return 'Adjusted By must be a valid User ID';
+    return '';
+  };
+
+  const handleBlur = (field: string) => {
+    let errorMsg = '';
+    
+    switch (field) {
+      case 'ItemId':
+        errorMsg = validateItemId(formData.ItemId);
+        break;
+      case 'WarehouseId':
+        errorMsg = validateWarehouseId(formData.WarehouseId);
+        break;
+      case 'AdjustmentType':
+        errorMsg = validateAdjustmentType(formData.AdjustmentType);
+        break;
+      case 'Quantity':
+        errorMsg = validateQuantity(formData.Quantity);
+        break;
+      case 'Reason':
+        errorMsg = validateReason(formData.Reason);
+        break;
+      case 'AdjustedBy':
+        errorMsg = validateAdjustedBy(formData.AdjustedBy);
+        break;
+    }
+
+    setFieldErrors(prev => ({
+      ...prev,
+      [field]: errorMsg
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Validate all fields before submission
+    const errors = {
+      ItemId: validateItemId(formData.ItemId),
+      WarehouseId: validateWarehouseId(formData.WarehouseId),
+      AdjustmentType: validateAdjustmentType(formData.AdjustmentType),
+      Quantity: validateQuantity(formData.Quantity),
+      Reason: validateReason(formData.Reason),
+      AdjustedBy: validateAdjustedBy(formData.AdjustedBy),
+    };
+
+    setFieldErrors(errors);
+
+    // Check if there are any validation errors
+    const hasErrors = Object.values(errors).some(err => err !== '');
+    if (hasErrors) {
+      setError('Please fix all validation errors before submitting');
+      return;
+    }
+
     setSubmitting(true);
 
     console.log('Form data before sending:', formData);
@@ -103,14 +212,45 @@ export default function StockAdjustmentsForm({ adjustmentToEdit, onSuccess, onCa
         ModifiyBy: 0,
         ModifiyAt: null,
       });
+      setFieldErrors({
+        ItemId: '',
+        WarehouseId: '',
+        AdjustmentType: '',
+        Quantity: '',
+        Reason: '',
+        AdjustedBy: '',
+      });
 
       if (onSuccess) onSuccess();
     } catch (err: any) {
       console.error('Error submitting stock adjustment:', err);
       console.error('Error response:', err?.response?.data);
-      const errorMessage = err?.response?.data?.errors
-        ? Object.values(err.response.data.errors).flat().join(', ')
-        : err?.response?.data?.message || err.message || 'Operation failed';
+      
+      // Handle different types of errors with user-friendly messages
+      let errorMessage = '';
+      
+      if (err?.response?.status === 404) {
+        errorMessage = 'Item ID, Warehouse ID, or User ID not found in the database. Please verify the IDs and try again.';
+      } else if (err?.response?.status === 409) {
+        errorMessage = 'This stock adjustment conflicts with existing records. Please check your data and try again.';
+      } else if (err?.response?.status === 500) {
+        errorMessage = 'Unable to save the stock adjustment. Please verify that Item ID, Warehouse ID, and User ID exist in the system.';
+      } else if (err?.response?.status === 400) {
+        // Bad request - validation error from server
+        if (err?.response?.data?.errors) {
+          const serverErrors = Object.values(err.response.data.errors).flat();
+          errorMessage = serverErrors.join(', ');
+        } else {
+          errorMessage = err?.response?.data?.message || 'Invalid data provided. Please check your entries.';
+        }
+      } else if (err?.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err?.message && !err.message.includes('status code')) {
+        errorMessage = err.message;
+      } else {
+        errorMessage = 'Unable to complete the operation. Please verify your data and try again.';
+      }
+      
       setError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -122,9 +262,17 @@ export default function StockAdjustmentsForm({ adjustmentToEdit, onSuccess, onCa
     setFormData({
       ...formData,
       [name]: name === 'AdjustmentId' || name === 'ItemId' || name === 'WarehouseId' || name === 'Quantity' || name === 'AdjustedBy'
-        ? Number(value)
+        ? Number(value) || 0
         : value,
     });
+
+    // Clear field error when user starts typing
+    if (fieldErrors[name as keyof typeof fieldErrors]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
   };
 
   return (
@@ -150,32 +298,29 @@ export default function StockAdjustmentsForm({ adjustmentToEdit, onSuccess, onCa
 
       <form onSubmit={handleSubmit}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-          <div>
-            <label htmlFor="AdjustmentId" style={labelStyle}>
-              Adjustment ID *
-            </label>
-            <input
-              type="number"
-              id="AdjustmentId"
-              name="AdjustmentId"
-              value={formData.AdjustmentId}
-              onChange={handleChange}
-              required
-              disabled={!!adjustmentToEdit}
-              style={{
-                ...inputStyle,
-                backgroundColor: adjustmentToEdit ? '#e0e0e0' : 'white',
-              }}
-              placeholder="e.g., 1"
-            />
-            {adjustmentToEdit && (
-              <small style={{ color: '#666', fontSize: '12px' }}>
+          {adjustmentToEdit && (
+            <div>
+              <label htmlFor="AdjustmentId" style={labelStyle}>
+                Adjustment ID
+              </label>
+              <input
+                type="number"
+                id="AdjustmentId"
+                name="AdjustmentId"
+                value={formData.AdjustmentId}
+                disabled
+                style={{
+                  ...inputStyle,
+                  backgroundColor: '#e0e0e0',
+                }}
+              />
+              <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
                 ID cannot be changed
               </small>
-            )}
-          </div>
+            </div>
+          )}
 
-          <div>
+          <div style={{ gridColumn: adjustmentToEdit ? 'auto' : 'span 2' }}>
             <label htmlFor="ItemId" style={labelStyle}>
               Item ID *
             </label>
@@ -183,12 +328,23 @@ export default function StockAdjustmentsForm({ adjustmentToEdit, onSuccess, onCa
               type="number"
               id="ItemId"
               name="ItemId"
-              value={formData.ItemId}
+              value={formData.ItemId || ''}
               onChange={handleChange}
+              onBlur={() => handleBlur('ItemId')}
               required
-              style={inputStyle}
+              min="1"
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.ItemId ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., 101"
             />
+            {fieldErrors.ItemId && (
+              <small style={errorTextStyle}>{fieldErrors.ItemId}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Select the item to adjust
+            </small>
           </div>
 
           <div>
@@ -199,12 +355,23 @@ export default function StockAdjustmentsForm({ adjustmentToEdit, onSuccess, onCa
               type="number"
               id="WarehouseId"
               name="WarehouseId"
-              value={formData.WarehouseId}
+              value={formData.WarehouseId || ''}
               onChange={handleChange}
+              onBlur={() => handleBlur('WarehouseId')}
               required
-              style={inputStyle}
+              min="1"
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.WarehouseId ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., 1"
             />
+            {fieldErrors.WarehouseId && (
+              <small style={errorTextStyle}>{fieldErrors.WarehouseId}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Warehouse location
+            </small>
           </div>
 
           <div>
@@ -216,8 +383,12 @@ export default function StockAdjustmentsForm({ adjustmentToEdit, onSuccess, onCa
               name="AdjustmentType"
               value={formData.AdjustmentType}
               onChange={handleChange}
+              onBlur={() => handleBlur('AdjustmentType')}
               required
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.AdjustmentType ? '#c62828' : '#ccc'
+              }}
             >
               <option value="">Select Type</option>
               <option value="INCREASE">INCREASE</option>
@@ -230,6 +401,12 @@ export default function StockAdjustmentsForm({ adjustmentToEdit, onSuccess, onCa
               <option value="ADJUST">ADJUST</option>
               <option value="TRANSFER">TRANSFER</option>
             </select>
+            {fieldErrors.AdjustmentType && (
+              <small style={errorTextStyle}>{fieldErrors.AdjustmentType}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Type of adjustment
+            </small>
           </div>
 
           <div>
@@ -240,13 +417,23 @@ export default function StockAdjustmentsForm({ adjustmentToEdit, onSuccess, onCa
               type="number"
               id="Quantity"
               name="Quantity"
-              value={formData.Quantity}
+              value={formData.Quantity || ''}
               onChange={handleChange}
+              onBlur={() => handleBlur('Quantity')}
               required
               min="1"
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.Quantity ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., 50"
             />
+            {fieldErrors.Quantity && (
+              <small style={errorTextStyle}>{fieldErrors.Quantity}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Number of units to adjust
+            </small>
           </div>
 
           <div>
@@ -257,12 +444,23 @@ export default function StockAdjustmentsForm({ adjustmentToEdit, onSuccess, onCa
               type="number"
               id="AdjustedBy"
               name="AdjustedBy"
-              value={formData.AdjustedBy}
+              value={formData.AdjustedBy || ''}
               onChange={handleChange}
+              onBlur={() => handleBlur('AdjustedBy')}
               required
-              style={inputStyle}
+              min="1"
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.AdjustedBy ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., 1"
             />
+            {fieldErrors.AdjustedBy && (
+              <small style={errorTextStyle}>{fieldErrors.AdjustedBy}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              User making the adjustment
+            </small>
           </div>
 
           <div style={{ gridColumn: '1 / -1' }}>
@@ -283,6 +481,9 @@ export default function StockAdjustmentsForm({ adjustmentToEdit, onSuccess, onCa
               required
               style={inputStyle}
             />
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Date and time of adjustment
+            </small>
           </div>
 
           <div style={{ gridColumn: '1 / -1' }}>
@@ -294,14 +495,23 @@ export default function StockAdjustmentsForm({ adjustmentToEdit, onSuccess, onCa
               name="Reason"
               value={formData.Reason}
               onChange={handleChange}
+              onBlur={() => handleBlur('Reason')}
               required
               style={{
                 ...inputStyle,
                 minHeight: '100px',
-                resize: 'vertical'
+                resize: 'vertical',
+                borderColor: fieldErrors.Reason ? '#c62828' : '#ccc'
               }}
               placeholder="Explain the reason for this stock adjustment..."
+              maxLength={500}
             />
+            {fieldErrors.Reason && (
+              <small style={errorTextStyle}>{fieldErrors.Reason}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Min 10 characters, max 500 characters ({formData.Reason.length}/500)
+            </small>
           </div>
         </div>
 
@@ -363,4 +573,12 @@ const inputStyle: React.CSSProperties = {
   fontSize: '16px',
   border: '1px solid #ccc',
   borderRadius: '4px',
+};
+
+const errorTextStyle: React.CSSProperties = {
+  color: '#c62828',
+  fontSize: '12px',
+  display: 'block',
+  marginTop: '4px',
+  fontWeight: '500'
 };

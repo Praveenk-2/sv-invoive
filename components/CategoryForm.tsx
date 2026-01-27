@@ -137,8 +137,8 @@ export default function CategoryForm({ categoryToEdit, onSuccess, onCancel }: Ca
       )}
 
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '15px' }}>
-          <div>
+        <div style={{ }}>
+          {/* <div>
             <label htmlFor="CategoryId" style={labelStyle}>
               Category ID *
             </label>
@@ -161,7 +161,7 @@ export default function CategoryForm({ categoryToEdit, onSuccess, onCancel }: Ca
                 ID cannot be changed
               </small>
             )}
-          </div>
+          </div> */}
 
           <div>
             <label htmlFor="CategoryName" style={labelStyle}>

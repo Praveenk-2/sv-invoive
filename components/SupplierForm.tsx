@@ -31,6 +31,15 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  // Field-specific errors
+  const [fieldErrors, setFieldErrors] = useState({
+    SupplierName: '',
+    Contact: '',
+    Email: '',
+    Address: '',
+    GSTNumber: '',
+  });
+
   useEffect(() => {
     if (supplierToEdit) {
       console.log('Editing supplier:', supplierToEdit);
@@ -62,11 +71,105 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
         ModifiyAt: new Date().toISOString(),
       });
     }
+    // Clear errors when switching modes
+    setFieldErrors({
+      SupplierName: '',
+      Contact: '',
+      Email: '',
+      Address: '',
+      GSTNumber: '',
+    });
+    setError('');
   }, [supplierToEdit, user]);
+
+  // Validation functions
+  const validateSupplierName = (name: string): string => {
+    if (!name || name.trim() === '') return 'Supplier name is required';
+    if (name.length < 2) return 'Supplier name must be at least 2 characters';
+    return '';
+  };
+
+  const validateContact = (contact: string): string => {
+    if (!contact || contact.trim() === '') return 'Contact number is required';
+    // Remove common separators for validation
+    const cleanContact = contact.replace(/[-\s()]/g, '');
+    if (!/^\+?[0-9]+$/.test(cleanContact)) return 'Contact number must contain only numbers (and optional + at start)';
+    if (cleanContact.replace('+', '').length < 10) return 'Contact number must be at least 10 digits';
+    return '';
+  };
+
+  const validateEmail = (email: string): string => {
+    if (!email || email.trim() === '') return 'Email is required';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return 'Please enter a valid email address';
+    return '';
+  };
+
+  const validateAddress = (address: string): string => {
+    if (!address || address.trim() === '') return 'Address is required';
+    if (address.length < 10) return 'Address must be at least 10 characters';
+    return '';
+  };
+
+  const validateGSTNumber = (gstNumber: string): string => {
+    if (!gstNumber || gstNumber.trim() === '') return 'GST Number is required';
+    // GST format: 2 digits state code + 10 chars PAN + 1 char entity number + 1 char Z + 1 char checksum
+    const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+    if (!gstRegex.test(gstNumber)) {
+      return 'Invalid GST Number format (e.g., 29ABCDE1234F1Z5)';
+    }
+    return '';
+  };
+
+  const handleBlur = (field: string) => {
+    let errorMsg = '';
+    
+    switch (field) {
+      case 'SupplierName':
+        errorMsg = validateSupplierName(formData.SupplierName);
+        break;
+      case 'Contact':
+        errorMsg = validateContact(formData.Contact);
+        break;
+      case 'Email':
+        errorMsg = validateEmail(formData.Email);
+        break;
+      case 'Address':
+        errorMsg = validateAddress(formData.Address);
+        break;
+      case 'GSTNumber':
+        errorMsg = validateGSTNumber(formData.GSTNumber);
+        break;
+    }
+
+    setFieldErrors(prev => ({
+      ...prev,
+      [field]: errorMsg
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Validate all fields before submission
+    const errors = {
+      SupplierName: validateSupplierName(formData.SupplierName),
+      Contact: validateContact(formData.Contact),
+      Email: validateEmail(formData.Email),
+      Address: validateAddress(formData.Address),
+      GSTNumber: validateGSTNumber(formData.GSTNumber),
+    };
+
+    setFieldErrors(errors);
+
+    // Check if there are any validation errors
+    const hasErrors = Object.values(errors).some(err => err !== '');
+    if (hasErrors) {
+      setError('Please fix all validation errors before submitting');
+      return;
+    }
+
     setSubmitting(true);
 
     console.log('Submitting supplier data:', formData);
@@ -101,14 +204,42 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
         ModifiyBy: 0,
         ModifiyAt: new Date().toISOString(),
       });
+      setFieldErrors({
+        SupplierName: '',
+        Contact: '',
+        Email: '',
+        Address: '',
+        GSTNumber: '',
+      });
       
       if (onSuccess) onSuccess();
     } catch (err: any) {
       console.error('Error submitting supplier:', err);
       console.error('Error response:', err?.response?.data);
-      const errorMessage = err?.response?.data?.errors 
-        ? Object.values(err.response.data.errors).flat().join(', ')
-        : err?.response?.data?.message || err.message || 'Operation failed';
+      
+      // Handle different types of errors with user-friendly messages
+      let errorMessage = '';
+      
+      if (err?.response?.status === 409) {
+        errorMessage = 'A supplier with this email, contact number, or GST number already exists. Please use unique details.';
+      } else if (err?.response?.status === 500) {
+        errorMessage = 'Unable to save the supplier. Please check your entries and try again.';
+      } else if (err?.response?.status === 400) {
+        // Bad request - validation error from server
+        if (err?.response?.data?.errors) {
+          const serverErrors = Object.values(err.response.data.errors).flat();
+          errorMessage = serverErrors.join(', ');
+        } else {
+          errorMessage = err?.response?.data?.message || 'Invalid data provided. Please check your entries.';
+        }
+      } else if (err?.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err?.message && !err.message.includes('status code')) {
+        errorMessage = err.message;
+      } else {
+        errorMessage = 'Unable to complete the operation. Please verify your data and try again.';
+      }
+      
       setError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -125,6 +256,14 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
               name === 'SupplierId' ? Number(value) : 
               value,
     });
+
+    // Clear field error when user starts typing
+    if (fieldErrors[name as keyof typeof fieldErrors]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
   };
 
   return (
@@ -150,32 +289,29 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
 
       <form onSubmit={handleSubmit}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '15px' }}>
-          <div>
-            <label htmlFor="SupplierId" style={labelStyle}>
-              Supplier ID *
-            </label>
-            <input
-              type="number"
-              id="SupplierId"
-              name="SupplierId"
-              value={formData.SupplierId}
-              onChange={handleChange}
-              required
-              disabled={!!supplierToEdit}
-              style={{
-                ...inputStyle,
-                backgroundColor: supplierToEdit ? '#e0e0e0' : 'white',
-              }}
-              placeholder="e.g., 1"
-            />
-            {supplierToEdit && (
-              <small style={{ color: '#666', fontSize: '12px' }}>
+          {supplierToEdit && (
+            <div>
+              <label htmlFor="SupplierId" style={labelStyle}>
+                Supplier ID
+              </label>
+              <input
+                type="number"
+                id="SupplierId"
+                name="SupplierId"
+                value={formData.SupplierId}
+                disabled
+                style={{
+                  ...inputStyle,
+                  backgroundColor: '#e0e0e0',
+                }}
+              />
+              <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
                 ID cannot be changed
               </small>
-            )}
-          </div>
+            </div>
+          )}
 
-          <div>
+          <div style={{ gridColumn: supplierToEdit ? 'auto' : 'span 2' }}>
             <label htmlFor="SupplierName" style={labelStyle}>
               Supplier Name *
             </label>
@@ -185,10 +321,20 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
               name="SupplierName"
               value={formData.SupplierName}
               onChange={handleChange}
+              onBlur={() => handleBlur('SupplierName')}
               required
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.SupplierName ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., ABC Suppliers Ltd."
             />
+            {fieldErrors.SupplierName && (
+              <small style={errorTextStyle}>{fieldErrors.SupplierName}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Full company or business name
+            </small>
           </div>
 
           <div>
@@ -201,10 +347,20 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
               name="Contact"
               value={formData.Contact}
               onChange={handleChange}
+              onBlur={() => handleBlur('Contact')}
               required
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.Contact ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., +91-9876543210"
             />
+            {fieldErrors.Contact && (
+              <small style={errorTextStyle}>{fieldErrors.Contact}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Min 10 digits, numbers only
+            </small>
           </div>
 
           <div>
@@ -217,10 +373,17 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
               name="Email"
               value={formData.Email}
               onChange={handleChange}
+              onBlur={() => handleBlur('Email')}
               required
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.Email ? '#c62828' : '#ccc'
+              }}
               placeholder="supplier@example.com"
             />
+            {fieldErrors.Email && (
+              <small style={errorTextStyle}>{fieldErrors.Email}</small>
+            )}
           </div>
 
           <div style={{ gridColumn: 'span 2' }}>
@@ -233,12 +396,20 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
               name="GSTNumber"
               value={formData.GSTNumber}
               onChange={handleChange}
+              onBlur={() => handleBlur('GSTNumber')}
               required
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.GSTNumber ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., 29ABCDE1234F1Z5"
+              maxLength={15}
             />
-            <small style={{ color: '#666', fontSize: '12px' }}>
-              15-digit GST identification number
+            {fieldErrors.GSTNumber && (
+              <small style={errorTextStyle}>{fieldErrors.GSTNumber}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              15-character GST identification number
             </small>
           </div>
         </div>
@@ -252,14 +423,22 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
             name="Address"
             value={formData.Address}
             onChange={handleChange}
+            onBlur={() => handleBlur('Address')}
             required
             rows={3}
             style={{
               ...inputStyle,
               resize: 'vertical',
+              borderColor: fieldErrors.Address ? '#c62828' : '#ccc'
             }}
             placeholder="Enter full address with city, state, and pincode"
           />
+          {fieldErrors.Address && (
+            <small style={errorTextStyle}>{fieldErrors.Address}</small>
+          )}
+          <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+            Complete address with street, city, state, and postal code
+          </small>
         </div>
 
         <div style={{ marginBottom: '15px' }}>
@@ -283,7 +462,7 @@ export default function SupplierForm({ supplierToEdit, onSuccess, onCancel }: Su
             />
             Is Active
           </label>
-          <small style={{ color: '#666', fontSize: '12px', marginLeft: '30px' }}>
+          <small style={{ color: '#666', fontSize: '12px', marginLeft: '30px', display: 'block', marginTop: '4px' }}>
             Active suppliers can be used in purchase orders
           </small>
         </div>
@@ -346,4 +525,12 @@ const inputStyle: React.CSSProperties = {
   fontSize: '16px',
   border: '1px solid #ccc',
   borderRadius: '4px',
+};
+
+const errorTextStyle: React.CSSProperties = {
+  color: '#c62828',
+  fontSize: '12px',
+  display: 'block',
+  marginTop: '4px',
+  fontWeight: '500'
 };

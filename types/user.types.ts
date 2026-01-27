@@ -5,6 +5,7 @@ export interface User {
   Username: string;
   PasswordHash: string;
   Email: string;
+  PhoneNumber: string;
   IsActive: boolean;
   CreatedAt: string;
   CreatedBy: number;  // UserId (number)
@@ -17,6 +18,7 @@ export interface CreateUserRequest {
   Username: string;
   PasswordHash: string;
   Email: string;
+  PhoneNumber: string;
   IsActive: boolean;
   CreatedAt?: string;
   CreatedBy: number;
@@ -29,6 +31,7 @@ export interface UpdateUserRequest {
   Username: string;
   PasswordHash: string;
   Email: string;
+  PhoneNumber: string;
   IsActive: boolean;
   CreatedAt?: string;
   CreatedBy?: number;

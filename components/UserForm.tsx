@@ -1,4 +1,3 @@
-// Component to create or update users
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -21,11 +20,12 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
     Username: '',
     PasswordHash: '',
     Email: '',
+    PhoneNumber: '',
     IsActive: true,
     CreatedAt: new Date().toISOString(),
     CreatedBy: currentUser?.id || 0,
     ModifiyBy: 0,
-    ModifiyAt: null as string | null,  // null instead of empty string
+    ModifiyAt: null as string | null,
   });
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -33,6 +33,14 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Field-specific errors
+  const [fieldErrors, setFieldErrors] = useState({
+    Username: '',
+    Email: '',
+    PasswordHash: '',
+    PhoneNumber: '',
+    confirmPassword: ''
+  });
 
   useEffect(() => {
     if (userToEdit) {
@@ -40,62 +48,141 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
       setFormData({
         UserId: userToEdit.UserId,
         Username: userToEdit.Username,
-        PasswordHash: userToEdit.PasswordHash,
+        PasswordHash: '',
         Email: userToEdit.Email,
+        PhoneNumber: userToEdit.PhoneNumber,
         IsActive: userToEdit.IsActive,
         CreatedAt: userToEdit.CreatedAt,
         CreatedBy: userToEdit.CreatedBy,
         ModifiyBy: currentUser?.id || 0,
         ModifiyAt: new Date().toISOString(),
       });
+      setConfirmPassword('');
     } else {
       setFormData({
         UserId: 0,
         Username: '',
         PasswordHash: '',
         Email: '',
+        PhoneNumber: '',
         IsActive: true,
         CreatedAt: new Date().toISOString(),
         CreatedBy: currentUser?.id || 0,
         ModifiyBy: 0,
-        ModifiyAt: null,  // null instead of empty string
+        ModifiyAt: null,
       });
+      setConfirmPassword('');
     }
+    setFieldErrors({
+      Username: '',
+      Email: '',
+      PasswordHash: '',
+      PhoneNumber: '',
+      confirmPassword: ''
+    });
   }, [userToEdit, currentUser]);
+
+  // Validation functions
+  const validateUsername = (username: string): string => {
+    if (!username) return 'Username is required';
+    if (username.length < 3) return 'Username must be at least 3 characters long';
+    if (!/^[A-Za-z]+$/.test(username)) return 'Username must contain only letters (no numbers or special characters)';
+    return '';
+  };
+
+  const validateEmail = (email: string): string => {
+    if (!email) return 'Email is required';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return 'Please enter a valid email address';
+    return '';
+  };
+
+  const validatePassword = (password: string, isEditing: boolean): string => {
+    if (!password && !isEditing) return 'Password is required';
+    if (password && password.length < 6) return 'Password must be at least 6 characters long';
+    if (password && !/[A-Z]/.test(password)) return 'Password must contain at least one capital letter';
+    if (password && !/[a-z]/.test(password)) return 'Password must contain at least one small letter';
+    if (password && !/[0-9]/.test(password)) return 'Password must contain at least one number';
+    return '';
+  };
+
+  const validatePhoneNumber = (phone: string): string => {
+    if (!phone) return 'Phone number is required';
+    if (phone.length < 10 || phone.length > 15) return 'Phone number must be between 10 and 15 digits';
+    if (!/^\+?[0-9]+$/.test(phone)) return 'Phone number must contain only numbers (and optional + at start)';
+    return '';
+  };
+
+  const validateConfirmPassword = (password: string, confirm: string): string => {
+    if (!confirm && !userToEdit) return 'Please confirm your password';
+    if (password && confirm && password !== confirm) return 'Passwords do not match';
+    return '';
+  };
+
+  const handleBlur = (field: string) => {
+    let errorMsg = '';
+    
+    switch (field) {
+      case 'Username':
+        errorMsg = validateUsername(formData.Username);
+        break;
+      case 'Email':
+        errorMsg = validateEmail(formData.Email);
+        break;
+      case 'PasswordHash':
+        errorMsg = validatePassword(formData.PasswordHash, !!userToEdit);
+        break;
+      case 'PhoneNumber':
+        errorMsg = validatePhoneNumber(formData.PhoneNumber);
+        break;
+      case 'confirmPassword':
+        errorMsg = validateConfirmPassword(formData.PasswordHash, confirmPassword);
+        break;
+    }
+
+    setFieldErrors(prev => ({
+      ...prev,
+      [field]: errorMsg
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // 🔐 Confirm password validation
-    if (!userToEdit && formData.PasswordHash !== confirmPassword) {
-      setError('Password and Confirm Password do not match');
-      return;
-    }
+    // Validate all fields
+    const errors = {
+      Username: validateUsername(formData.Username),
+      Email: validateEmail(formData.Email),
+      PasswordHash: validatePassword(formData.PasswordHash, !!userToEdit),
+      PhoneNumber: validatePhoneNumber(formData.PhoneNumber),
+      confirmPassword: validateConfirmPassword(formData.PasswordHash, confirmPassword)
+    };
 
-    if (userToEdit && formData.PasswordHash && formData.PasswordHash !== confirmPassword) {
-      setError('Password and Confirm Password do not match');
+    setFieldErrors(errors);
+
+    // Check if there are any errors
+    const hasErrors = Object.values(errors).some(err => err !== '');
+    if (hasErrors) {
+      setError('Please fix all validation errors before submitting');
       return;
     }
 
     setSubmitting(true);
 
-    console.log('Form data before sending:', formData);
-
-    // In UserForm.tsx handleSubmit function
     try {
       if (userToEdit) {
         console.log('Updating user with ID:', userToEdit.UserId);
         await userService.updateUser(userToEdit.UserId, {
           ...formData,
-          ModifiyAt: new Date().toISOString() // Ensure it's a valid date string
+          ModifiyAt: new Date().toISOString()
         });
         alert('User updated successfully!');
       } else {
         console.log('Creating new user');
         await userService.createUser({
           ...formData,
-          ModifiyAt: new Date().toISOString() // Ensure it's a valid date string for create too
+          ModifiyAt: new Date().toISOString()
         });
         alert('User created successfully!');
       }
@@ -105,11 +192,20 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
         Username: '',
         PasswordHash: '',
         Email: '',
+        PhoneNumber: '',
         IsActive: true,
         CreatedAt: new Date().toISOString(),
         CreatedBy: currentUser?.id || 0,
         ModifiyBy: 0,
         ModifiyAt: null,
+      });
+      setConfirmPassword('');
+      setFieldErrors({
+        Username: '',
+        Email: '',
+        PasswordHash: '',
+        PhoneNumber: '',
+        confirmPassword: ''
       });
 
       if (onSuccess) onSuccess();
@@ -131,7 +227,14 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
       ...formData,
       [name]: type === 'checkbox' ? checked : name === 'UserId' ? Number(value) : value,
     });
-    setConfirmPassword('');
+    
+    // Clear field error when user starts typing
+    if (fieldErrors[name as keyof typeof fieldErrors]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
   };
 
   return (
@@ -157,31 +260,6 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
 
       <form onSubmit={handleSubmit}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-          {/* <div>
-            <label htmlFor="UserId" style={labelStyle}>
-              User ID *
-            </label>
-            <input
-              type="number"
-              id="UserId"
-              name="UserId"
-              value={formData.UserId}
-              onChange={handleChange}
-              required
-              disabled={!!userToEdit}
-              style={{
-                ...inputStyle,
-                backgroundColor: userToEdit ? '#e0e0e0' : 'white',
-              }}
-              placeholder="e.g., 1"
-            />
-            {userToEdit && (
-              <small style={{ color: '#666', fontSize: '12px' }}>
-                ID cannot be changed
-              </small>
-            )}
-          </div> */}
-
           <div>
             <label htmlFor="Username" style={labelStyle}>
               Username *
@@ -192,10 +270,20 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
               name="Username"
               value={formData.Username}
               onChange={handleChange}
+              onBlur={() => handleBlur('Username')}
               required
-              style={inputStyle}
-              placeholder="e.g., john_doe"
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.Username ? '#c62828' : '#ccc'
+              }}
+              placeholder="e.g., johndoe"
             />
+            {fieldErrors.Username && (
+              <small style={errorTextStyle}>{fieldErrors.Username}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Min 3 letters, letters only
+            </small>
           </div>
 
           <div>
@@ -208,10 +296,17 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
               name="Email"
               value={formData.Email}
               onChange={handleChange}
+              onBlur={() => handleBlur('Email')}
               required
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.Email ? '#c62828' : '#ccc'
+              }}
               placeholder="user@example.com"
             />
+            {fieldErrors.Email && (
+              <small style={errorTextStyle}>{fieldErrors.Email}</small>
+            )}
           </div>
 
           <div style={{ position: 'relative' }}>
@@ -225,8 +320,13 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
               name="PasswordHash"
               value={formData.PasswordHash}
               onChange={handleChange}
+              onBlur={() => handleBlur('PasswordHash')}
               required={!userToEdit}
-              style={{ ...inputStyle, paddingRight: '42px' }}
+              style={{
+                ...inputStyle,
+                paddingRight: '42px',
+                borderColor: fieldErrors.PasswordHash ? '#c62828' : '#ccc'
+              }}
               placeholder="Enter password"
             />
 
@@ -243,8 +343,11 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
               {showPassword ? <IoMdEyeOff size={22} /> : <IoMdEye size={22} />}
             </span>
 
-            <small style={{ color: '#666', fontSize: '12px' }}>
-              {userToEdit ? 'Only fill to change password' : 'Min 6 characters'}
+            {fieldErrors.PasswordHash && (
+              <small style={errorTextStyle}>{fieldErrors.PasswordHash}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              {userToEdit ? 'Only fill to change password' : 'Min 6 chars: 1 capital, 1 small, 1 number'}
             </small>
           </div>
 
@@ -256,9 +359,19 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
             <input
               type={showConfirmPassword ? 'text' : 'password'}
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                if (fieldErrors.confirmPassword) {
+                  setFieldErrors(prev => ({ ...prev, confirmPassword: '' }));
+                }
+              }}
+              onBlur={() => handleBlur('confirmPassword')}
               required={!userToEdit}
-              style={{ ...inputStyle, paddingRight: '42px' }}
+              style={{
+                ...inputStyle,
+                paddingRight: '42px',
+                borderColor: fieldErrors.confirmPassword ? '#c62828' : '#ccc'
+              }}
               placeholder="Re-enter password"
             />
 
@@ -274,8 +387,37 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
             >
               {showConfirmPassword ? <IoMdEyeOff size={22} /> : <IoMdEye size={22} />}
             </span>
+
+            {fieldErrors.confirmPassword && (
+              <small style={errorTextStyle}>{fieldErrors.confirmPassword}</small>
+            )}
           </div>
 
+          <div>
+            <label htmlFor="PhoneNumber" style={labelStyle}>
+              Phone Number *
+            </label>
+            <input
+              type="tel"
+              id="PhoneNumber"
+              name="PhoneNumber"
+              value={formData.PhoneNumber}
+              onChange={handleChange}
+              onBlur={() => handleBlur('PhoneNumber')}
+              required
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.PhoneNumber ? '#c62828' : '#ccc'
+              }}
+              placeholder="e.g., +1234567890"
+            />
+            {fieldErrors.PhoneNumber && (
+              <small style={errorTextStyle}>{fieldErrors.PhoneNumber}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Numbers only (+ allowed at start)
+            </small>
+          </div>
         </div>
 
         <div style={{ marginTop: '15px', marginBottom: '15px' }}>
@@ -306,7 +448,6 @@ export default function UserForm({ userToEdit, onSuccess, onCancel }: UserFormPr
             Active users can log in to the system
           </small>
         </div>
-
 
         <div style={{ display: 'flex', gap: '10px' }}>
           <button
@@ -366,4 +507,12 @@ const inputStyle: React.CSSProperties = {
   fontSize: '16px',
   border: '1px solid #ccc',
   borderRadius: '4px',
+};
+
+const errorTextStyle: React.CSSProperties = {
+  color: '#c62828',
+  fontSize: '12px',
+  display: 'block',
+  marginTop: '4px',
+  fontWeight: '500'
 };

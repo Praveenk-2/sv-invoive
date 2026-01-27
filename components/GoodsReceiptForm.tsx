@@ -29,6 +29,14 @@ export default function GoodsReceiptForm({ grnToEdit, onSuccess, onCancel }: Goo
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  // Field-specific errors
+  const [fieldErrors, setFieldErrors] = useState({
+    GRNNumber: '',
+    POId: '',
+    ReceivedBy: '',
+    Status: '',
+  });
+
   useEffect(() => {
     if (grnToEdit) {
       console.log('Editing goods receipt:', grnToEdit);
@@ -58,11 +66,87 @@ export default function GoodsReceiptForm({ grnToEdit, onSuccess, onCancel }: Goo
         ModifiyAt: null,
       });
     }
+    // Clear errors when switching modes
+    setFieldErrors({
+      GRNNumber: '',
+      POId: '',
+      ReceivedBy: '',
+      Status: '',
+    });
+    setError('');
   }, [grnToEdit, currentUser]);
+
+  // Validation functions
+  const validateGRNNumber = (grnNumber: string): string => {
+    if (!grnNumber || grnNumber.trim() === '') return 'GRN Number is required';
+    if (grnNumber.length < 3) return 'GRN Number must be at least 3 characters';
+    return '';
+  };
+
+  const validatePOId = (poId: number): string => {
+    if (!poId || poId === 0) return 'Purchase Order ID is required';
+    if (poId < 1) return 'Purchase Order ID must be a positive number';
+    return '';
+  };
+
+  const validateReceivedBy = (receivedBy: number): string => {
+    if (!receivedBy || receivedBy === 0) return 'Received By (User ID) is required';
+    if (receivedBy < 1) return 'Received By must be a valid User ID';
+    return '';
+  };
+
+  const validateStatus = (status: string): string => {
+    if (!status || status.trim() === '') return 'Status is required';
+    const validStatuses = ['PENDING', 'RECEIVED', 'PARTIAL', 'COMPLETED', 'REJECTED', 'CANCELLED', 'IN PROGRESS'];
+    if (!validStatuses.includes(status)) return 'Please select a valid status';
+    return '';
+  };
+
+  const handleBlur = (field: string) => {
+    let errorMsg = '';
+    
+    switch (field) {
+      case 'GRNNumber':
+        errorMsg = validateGRNNumber(formData.GRNNumber);
+        break;
+      case 'POId':
+        errorMsg = validatePOId(formData.POId);
+        break;
+      case 'ReceivedBy':
+        errorMsg = validateReceivedBy(formData.ReceivedBy);
+        break;
+      case 'Status':
+        errorMsg = validateStatus(formData.Status);
+        break;
+    }
+
+    setFieldErrors(prev => ({
+      ...prev,
+      [field]: errorMsg
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Validate all fields before submission
+    const errors = {
+      GRNNumber: validateGRNNumber(formData.GRNNumber),
+      POId: validatePOId(formData.POId),
+      ReceivedBy: validateReceivedBy(formData.ReceivedBy),
+      Status: validateStatus(formData.Status),
+    };
+
+    setFieldErrors(errors);
+
+    // Check if there are any validation errors
+    const hasErrors = Object.values(errors).some(err => err !== '');
+    if (hasErrors) {
+      setError('Please fix all validation errors before submitting');
+      return;
+    }
+
     setSubmitting(true);
 
     console.log('Form data before sending:', formData);
@@ -96,14 +180,43 @@ export default function GoodsReceiptForm({ grnToEdit, onSuccess, onCancel }: Goo
         ModifiyBy: 0,
         ModifiyAt: null,
       });
+      setFieldErrors({
+        GRNNumber: '',
+        POId: '',
+        ReceivedBy: '',
+        Status: '',
+      });
 
       if (onSuccess) onSuccess();
     } catch (err: any) {
       console.error('Error submitting goods receipt:', err);
       console.error('Error response:', err?.response?.data);
-      const errorMessage = err?.response?.data?.errors
-        ? Object.values(err.response.data.errors).flat().join(', ')
-        : err?.response?.data?.message || err.message || 'Operation failed';
+      
+      // Handle different types of errors with user-friendly messages
+      let errorMessage = '';
+      
+      if (err?.response?.status === 404) {
+        errorMessage = 'Purchase Order ID or User ID not found in the database. Please verify the IDs and try again.';
+      } else if (err?.response?.status === 409) {
+        errorMessage = 'A goods receipt with this GRN Number already exists. Please use a unique GRN Number.';
+      } else if (err?.response?.status === 500) {
+        errorMessage = 'Unable to save the goods receipt. Please verify that the Purchase Order ID and User ID exist in the system.';
+      } else if (err?.response?.status === 400) {
+        // Bad request - validation error from server
+        if (err?.response?.data?.errors) {
+          const serverErrors = Object.values(err.response.data.errors).flat();
+          errorMessage = serverErrors.join(', ');
+        } else {
+          errorMessage = err?.response?.data?.message || 'Invalid data provided. Please check your entries.';
+        }
+      } else if (err?.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err?.message && !err.message.includes('status code')) {
+        errorMessage = err.message;
+      } else {
+        errorMessage = 'Unable to complete the operation. Please verify your data and try again.';
+      }
+      
       setError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -114,8 +227,16 @@ export default function GoodsReceiptForm({ grnToEdit, onSuccess, onCancel }: Goo
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: name === 'GRNId' || name === 'POId' || name === 'ReceivedBy' ? Number(value) : value,
+      [name]: name === 'GRNId' || name === 'POId' || name === 'ReceivedBy' ? Number(value) || 0 : value,
     });
+
+    // Clear field error when user starts typing
+    if (fieldErrors[name as keyof typeof fieldErrors]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
   };
 
   return (
@@ -141,32 +262,29 @@ export default function GoodsReceiptForm({ grnToEdit, onSuccess, onCancel }: Goo
 
       <form onSubmit={handleSubmit}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-          <div>
-            <label htmlFor="GRNId" style={labelStyle}>
-              GRN ID *
-            </label>
-            <input
-              type="number"
-              id="GRNId"
-              name="GRNId"
-              value={formData.GRNId}
-              onChange={handleChange}
-              required
-              disabled={!!grnToEdit}
-              style={{
-                ...inputStyle,
-                backgroundColor: grnToEdit ? '#e0e0e0' : 'white',
-              }}
-              placeholder="e.g., 1"
-            />
-            {grnToEdit && (
-              <small style={{ color: '#666', fontSize: '12px' }}>
+          {grnToEdit && (
+            <div>
+              <label htmlFor="GRNId" style={labelStyle}>
+                GRN ID
+              </label>
+              <input
+                type="number"
+                id="GRNId"
+                name="GRNId"
+                value={formData.GRNId}
+                disabled
+                style={{
+                  ...inputStyle,
+                  backgroundColor: '#e0e0e0',
+                }}
+              />
+              <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
                 ID cannot be changed
               </small>
-            )}
-          </div>
+            </div>
+          )}
 
-          <div>
+          <div style={{ gridColumn: grnToEdit ? 'auto' : 'span 2' }}>
             <label htmlFor="GRNNumber" style={labelStyle}>
               GRN Number *
             </label>
@@ -176,10 +294,20 @@ export default function GoodsReceiptForm({ grnToEdit, onSuccess, onCancel }: Goo
               name="GRNNumber"
               value={formData.GRNNumber}
               onChange={handleChange}
+              onBlur={() => handleBlur('GRNNumber')}
               required
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.GRNNumber ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., GRN-2024-001"
             />
+            {fieldErrors.GRNNumber && (
+              <small style={errorTextStyle}>{fieldErrors.GRNNumber}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Unique goods receipt identifier
+            </small>
           </div>
 
           <div>
@@ -190,12 +318,23 @@ export default function GoodsReceiptForm({ grnToEdit, onSuccess, onCancel }: Goo
               type="number"
               id="POId"
               name="POId"
-              value={formData.POId}
+              value={formData.POId || ''}
               onChange={handleChange}
+              onBlur={() => handleBlur('POId')}
               required
-              style={inputStyle}
+              min="1"
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.POId ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., 123"
             />
+            {fieldErrors.POId && (
+              <small style={errorTextStyle}>{fieldErrors.POId}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Related purchase order
+            </small>
           </div>
 
           <div>
@@ -207,8 +346,12 @@ export default function GoodsReceiptForm({ grnToEdit, onSuccess, onCancel }: Goo
               name="Status"
               value={formData.Status}
               onChange={handleChange}
+              onBlur={() => handleBlur('Status')}
               required
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.Status ? '#c62828' : '#ccc'
+              }}
             >
               <option value="">Select Status</option>
               <option value="PENDING">PENDING</option>
@@ -219,6 +362,12 @@ export default function GoodsReceiptForm({ grnToEdit, onSuccess, onCancel }: Goo
               <option value="CANCELLED">CANCELLED</option>
               <option value="IN PROGRESS">IN PROGRESS</option>
             </select>
+            {fieldErrors.Status && (
+              <small style={errorTextStyle}>{fieldErrors.Status}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Current receipt status
+            </small>
           </div>
 
           <div>
@@ -229,12 +378,23 @@ export default function GoodsReceiptForm({ grnToEdit, onSuccess, onCancel }: Goo
               type="number"
               id="ReceivedBy"
               name="ReceivedBy"
-              value={formData.ReceivedBy}
+              value={formData.ReceivedBy || ''}
               onChange={handleChange}
+              onBlur={() => handleBlur('ReceivedBy')}
               required
-              style={inputStyle}
+              min="1"
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.ReceivedBy ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., 1"
             />
+            {fieldErrors.ReceivedBy && (
+              <small style={errorTextStyle}>{fieldErrors.ReceivedBy}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              User who received the goods
+            </small>
           </div>
 
           <div>
@@ -255,6 +415,9 @@ export default function GoodsReceiptForm({ grnToEdit, onSuccess, onCancel }: Goo
               required
               style={inputStyle}
             />
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Date and time goods were received
+            </small>
           </div>
         </div>
 
@@ -316,4 +479,12 @@ const inputStyle: React.CSSProperties = {
   fontSize: '16px',
   border: '1px solid #ccc',
   borderRadius: '4px',
+};
+
+const errorTextStyle: React.CSSProperties = {
+  color: '#c62828',
+  fontSize: '12px',
+  display: 'block',
+  marginTop: '4px',
+  fontWeight: '500'
 };

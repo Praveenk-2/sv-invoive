@@ -33,6 +33,16 @@ export default function StockLedgerForm({ ledgerToEdit, onSuccess, onCancel }: S
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  // Field-specific errors
+  const [fieldErrors, setFieldErrors] = useState({
+    ItemId: '',
+    WarehouseId: '',
+    ChangeType: '',
+    Quantity: '',
+    ReferenceType: '',
+    ReferenceId: '',
+  });
+
   useEffect(() => {
     if (ledgerToEdit) {
       console.log('Editing stock ledger:', ledgerToEdit);
@@ -66,11 +76,109 @@ export default function StockLedgerForm({ ledgerToEdit, onSuccess, onCancel }: S
         ModifiyAt: null,
       });
     }
+    // Clear errors when switching modes
+    setFieldErrors({
+      ItemId: '',
+      WarehouseId: '',
+      ChangeType: '',
+      Quantity: '',
+      ReferenceType: '',
+      ReferenceId: '',
+    });
+    setError('');
   }, [ledgerToEdit, currentUser]);
+
+  // Validation functions
+  const validateItemId = (itemId: number): string => {
+    if (!itemId || itemId === 0) return 'Item ID is required';
+    if (itemId < 1) return 'Item ID must be a positive number';
+    return '';
+  };
+
+  const validateWarehouseId = (warehouseId: number): string => {
+    if (!warehouseId || warehouseId === 0) return 'Warehouse ID is required';
+    if (warehouseId < 1) return 'Warehouse ID must be a positive number';
+    return '';
+  };
+
+  const validateChangeType = (changeType: string): string => {
+    if (!changeType || changeType.trim() === '') return 'Change type is required';
+    const validTypes = ['IN', 'OUT', 'ADJUSTMENT', 'RETURN', 'TRANSFER'];
+    if (!validTypes.includes(changeType)) return 'Please select a valid change type';
+    return '';
+  };
+
+  const validateQuantity = (quantity: number): string => {
+    if (quantity === 0) return 'Quantity cannot be zero';
+    // Note: We allow negative quantities for OUT transactions
+    return '';
+  };
+
+  const validateReferenceType = (refType: string): string => {
+    if (!refType || refType.trim() === '') return 'Reference type is required';
+    if (refType.length < 2) return 'Reference type must be at least 2 characters';
+    return '';
+  };
+
+  const validateReferenceId = (refId: number): string => {
+    if (!refId || refId === 0) return 'Reference ID is required';
+    if (refId < 1) return 'Reference ID must be a positive number';
+    return '';
+  };
+
+  const handleBlur = (field: string) => {
+    let errorMsg = '';
+    
+    switch (field) {
+      case 'ItemId':
+        errorMsg = validateItemId(formData.ItemId);
+        break;
+      case 'WarehouseId':
+        errorMsg = validateWarehouseId(formData.WarehouseId);
+        break;
+      case 'ChangeType':
+        errorMsg = validateChangeType(formData.ChangeType);
+        break;
+      case 'Quantity':
+        errorMsg = validateQuantity(formData.Quantity);
+        break;
+      case 'ReferenceType':
+        errorMsg = validateReferenceType(formData.ReferenceType);
+        break;
+      case 'ReferenceId':
+        errorMsg = validateReferenceId(formData.ReferenceId);
+        break;
+    }
+
+    setFieldErrors(prev => ({
+      ...prev,
+      [field]: errorMsg
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Validate all fields before submission
+    const errors = {
+      ItemId: validateItemId(formData.ItemId),
+      WarehouseId: validateWarehouseId(formData.WarehouseId),
+      ChangeType: validateChangeType(formData.ChangeType),
+      Quantity: validateQuantity(formData.Quantity),
+      ReferenceType: validateReferenceType(formData.ReferenceType),
+      ReferenceId: validateReferenceId(formData.ReferenceId),
+    };
+
+    setFieldErrors(errors);
+
+    // Check if there are any validation errors
+    const hasErrors = Object.values(errors).some(err => err !== '');
+    if (hasErrors) {
+      setError('Please fix all validation errors before submitting');
+      return;
+    }
+
     setSubmitting(true);
 
     console.log('Form data before sending:', formData);
@@ -106,14 +214,45 @@ export default function StockLedgerForm({ ledgerToEdit, onSuccess, onCancel }: S
         ModifiyBy: 0,
         ModifiyAt: null,
       });
+      setFieldErrors({
+        ItemId: '',
+        WarehouseId: '',
+        ChangeType: '',
+        Quantity: '',
+        ReferenceType: '',
+        ReferenceId: '',
+      });
 
       if (onSuccess) onSuccess();
     } catch (err: any) {
       console.error('Error submitting stock ledger:', err);
       console.error('Error response:', err?.response?.data);
-      const errorMessage = err?.response?.data?.errors
-        ? Object.values(err.response.data.errors).flat().join(', ')
-        : err?.response?.data?.message || err.message || 'Operation failed';
+      
+      // Handle different types of errors with user-friendly messages
+      let errorMessage = '';
+      
+      if (err?.response?.status === 404) {
+        errorMessage = 'Item ID, Warehouse ID, or Reference ID not found in the database. Please verify the IDs and try again.';
+      } else if (err?.response?.status === 409) {
+        errorMessage = 'This stock ledger entry conflicts with existing records. Please check your data and try again.';
+      } else if (err?.response?.status === 500) {
+        errorMessage = 'Unable to save the stock ledger entry. Please verify that Item ID and Warehouse ID exist in the system.';
+      } else if (err?.response?.status === 400) {
+        // Bad request - validation error from server
+        if (err?.response?.data?.errors) {
+          const serverErrors = Object.values(err.response.data.errors).flat();
+          errorMessage = serverErrors.join(', ');
+        } else {
+          errorMessage = err?.response?.data?.message || 'Invalid data provided. Please check your entries.';
+        }
+      } else if (err?.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err?.message && !err.message.includes('status code')) {
+        errorMessage = err.message;
+      } else {
+        errorMessage = 'Unable to complete the operation. Please verify your data and try again.';
+      }
+      
       setError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -125,9 +264,17 @@ export default function StockLedgerForm({ ledgerToEdit, onSuccess, onCancel }: S
     setFormData({
       ...formData,
       [name]: ['LedgerId', 'ItemId', 'WarehouseId', 'Quantity', 'ReferenceId'].includes(name) 
-        ? Number(value) 
+        ? Number(value) || 0
         : value,
     });
+
+    // Clear field error when user starts typing
+    if (fieldErrors[name as keyof typeof fieldErrors]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
   };
 
   return (
@@ -153,32 +300,29 @@ export default function StockLedgerForm({ ledgerToEdit, onSuccess, onCancel }: S
 
       <form onSubmit={handleSubmit}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-          <div>
-            <label htmlFor="LedgerId" style={labelStyle}>
-              Ledger ID *
-            </label>
-            <input
-              type="number"
-              id="LedgerId"
-              name="LedgerId"
-              value={formData.LedgerId}
-              onChange={handleChange}
-              required
-              disabled={!!ledgerToEdit}
-              style={{
-                ...inputStyle,
-                backgroundColor: ledgerToEdit ? '#e0e0e0' : 'white',
-              }}
-              placeholder="e.g., 1"
-            />
-            {ledgerToEdit && (
-              <small style={{ color: '#666', fontSize: '12px' }}>
+          {ledgerToEdit && (
+            <div>
+              <label htmlFor="LedgerId" style={labelStyle}>
+                Ledger ID
+              </label>
+              <input
+                type="number"
+                id="LedgerId"
+                name="LedgerId"
+                value={formData.LedgerId}
+                disabled
+                style={{
+                  ...inputStyle,
+                  backgroundColor: '#e0e0e0',
+                }}
+              />
+              <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
                 ID cannot be changed
               </small>
-            )}
-          </div>
+            </div>
+          )}
 
-          <div>
+          <div style={{ gridColumn: ledgerToEdit ? 'auto' : 'span 2' }}>
             <label htmlFor="ItemId" style={labelStyle}>
               Item ID *
             </label>
@@ -186,12 +330,23 @@ export default function StockLedgerForm({ ledgerToEdit, onSuccess, onCancel }: S
               type="number"
               id="ItemId"
               name="ItemId"
-              value={formData.ItemId}
+              value={formData.ItemId || ''}
               onChange={handleChange}
+              onBlur={() => handleBlur('ItemId')}
               required
-              style={inputStyle}
+              min="1"
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.ItemId ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., 101"
             />
+            {fieldErrors.ItemId && (
+              <small style={errorTextStyle}>{fieldErrors.ItemId}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Select the item for this transaction
+            </small>
           </div>
 
           <div>
@@ -202,12 +357,23 @@ export default function StockLedgerForm({ ledgerToEdit, onSuccess, onCancel }: S
               type="number"
               id="WarehouseId"
               name="WarehouseId"
-              value={formData.WarehouseId}
+              value={formData.WarehouseId || ''}
               onChange={handleChange}
+              onBlur={() => handleBlur('WarehouseId')}
               required
-              style={inputStyle}
+              min="1"
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.WarehouseId ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., 1"
             />
+            {fieldErrors.WarehouseId && (
+              <small style={errorTextStyle}>{fieldErrors.WarehouseId}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Warehouse location
+            </small>
           </div>
 
           <div>
@@ -219,8 +385,12 @@ export default function StockLedgerForm({ ledgerToEdit, onSuccess, onCancel }: S
               name="ChangeType"
               value={formData.ChangeType}
               onChange={handleChange}
+              onBlur={() => handleBlur('ChangeType')}
               required
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.ChangeType ? '#c62828' : '#ccc'
+              }}
             >
               <option value="IN">IN - Stock Incoming</option>
               <option value="OUT">OUT - Stock Outgoing</option>
@@ -228,6 +398,9 @@ export default function StockLedgerForm({ ledgerToEdit, onSuccess, onCancel }: S
               <option value="RETURN">RETURN - Stock Return</option>
               <option value="TRANSFER">TRANSFER - Warehouse Transfer</option>
             </select>
+            {fieldErrors.ChangeType && (
+              <small style={errorTextStyle}>{fieldErrors.ChangeType}</small>
+            )}
           </div>
 
           <div>
@@ -238,13 +411,20 @@ export default function StockLedgerForm({ ledgerToEdit, onSuccess, onCancel }: S
               type="number"
               id="Quantity"
               name="Quantity"
-              value={formData.Quantity}
+              value={formData.Quantity || ''}
               onChange={handleChange}
+              onBlur={() => handleBlur('Quantity')}
               required
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.Quantity ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., 100 or -50"
             />
-            <small style={{ color: '#666', fontSize: '12px' }}>
+            {fieldErrors.Quantity && (
+              <small style={errorTextStyle}>{fieldErrors.Quantity}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
               Use positive for IN, negative for OUT
             </small>
           </div>
@@ -259,10 +439,20 @@ export default function StockLedgerForm({ ledgerToEdit, onSuccess, onCancel }: S
               name="ReferenceType"
               value={formData.ReferenceType}
               onChange={handleChange}
+              onBlur={() => handleBlur('ReferenceType')}
               required
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.ReferenceType ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., PURCHASE_ORDER, SALE, etc."
             />
+            {fieldErrors.ReferenceType && (
+              <small style={errorTextStyle}>{fieldErrors.ReferenceType}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Transaction reference type
+            </small>
           </div>
 
           <div>
@@ -273,12 +463,23 @@ export default function StockLedgerForm({ ledgerToEdit, onSuccess, onCancel }: S
               type="number"
               id="ReferenceId"
               name="ReferenceId"
-              value={formData.ReferenceId}
+              value={formData.ReferenceId || ''}
               onChange={handleChange}
+              onBlur={() => handleBlur('ReferenceId')}
               required
-              style={inputStyle}
+              min="1"
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.ReferenceId ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., 5001"
             />
+            {fieldErrors.ReferenceId && (
+              <small style={errorTextStyle}>{fieldErrors.ReferenceId}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Related transaction ID
+            </small>
           </div>
 
           <div>
@@ -294,6 +495,9 @@ export default function StockLedgerForm({ ledgerToEdit, onSuccess, onCancel }: S
               required
               style={inputStyle}
             />
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Date and time of transaction
+            </small>
           </div>
         </div>
 
@@ -304,8 +508,8 @@ export default function StockLedgerForm({ ledgerToEdit, onSuccess, onCancel }: S
           borderRadius: '4px',
           fontSize: '13px'
         }}>
-          <strong>Note:</strong> This transaction will affect the inventory levels for Item #{formData.ItemId} 
-          in Warehouse #{formData.WarehouseId}. Please verify the details before submitting.
+          <strong>Note:</strong> This transaction will affect the inventory levels for Item #{formData.ItemId || '?'} 
+          in Warehouse #{formData.WarehouseId || '?'}. Please verify the details before submitting.
         </div>
 
         <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
@@ -366,4 +570,12 @@ const inputStyle: React.CSSProperties = {
   fontSize: '16px',
   border: '1px solid #ccc',
   borderRadius: '4px',
+};
+
+const errorTextStyle: React.CSSProperties = {
+  color: '#c62828',
+  fontSize: '12px',
+  display: 'block',
+  marginTop: '4px',
+  fontWeight: '500'
 };

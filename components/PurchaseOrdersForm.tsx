@@ -29,6 +29,14 @@ export default function PurchaseOrdersForm({ poToEdit, onSuccess, onCancel }: Pu
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  // Field-specific errors
+  const [fieldErrors, setFieldErrors] = useState({
+    PONumber: '',
+    SupplierId: '',
+    Status: '',
+    TotalAmount: '',
+  });
+
   useEffect(() => {
     if (poToEdit) {
       console.log('Editing purchase order:', poToEdit);
@@ -58,11 +66,87 @@ export default function PurchaseOrdersForm({ poToEdit, onSuccess, onCancel }: Pu
         ModifiyAt: null,
       });
     }
+    // Clear errors when switching modes
+    setFieldErrors({
+      PONumber: '',
+      SupplierId: '',
+      Status: '',
+      TotalAmount: '',
+    });
+    setError('');
   }, [poToEdit, currentUser]);
+
+  // Validation functions
+  const validatePONumber = (poNumber: string): string => {
+    if (!poNumber || poNumber.trim() === '') return 'PO Number is required';
+    if (poNumber.length < 3) return 'PO Number must be at least 3 characters';
+    return '';
+  };
+
+  const validateSupplierId = (supplierId: number): string => {
+    if (!supplierId || supplierId === 0) return 'Supplier ID is required';
+    if (supplierId < 1) return 'Supplier ID must be a positive number';
+    return '';
+  };
+
+  const validateStatus = (status: string): string => {
+    if (!status || status.trim() === '') return 'Status is required';
+    const validStatuses = ['DRAFT', 'PENDING', 'APPROVED', 'IN PROGRESS', 'PROCESSING', 'COMPLETED', 'REJECTED', 'CANCELLED'];
+    if (!validStatuses.includes(status)) return 'Please select a valid status';
+    return '';
+  };
+
+  const validateTotalAmount = (amount: number): string => {
+    if (amount < 0) return 'Total amount cannot be negative';
+    if (amount === 0) return 'Total amount must be greater than 0';
+    return '';
+  };
+
+  const handleBlur = (field: string) => {
+    let errorMsg = '';
+    
+    switch (field) {
+      case 'PONumber':
+        errorMsg = validatePONumber(formData.PONumber);
+        break;
+      case 'SupplierId':
+        errorMsg = validateSupplierId(formData.SupplierId);
+        break;
+      case 'Status':
+        errorMsg = validateStatus(formData.Status);
+        break;
+      case 'TotalAmount':
+        errorMsg = validateTotalAmount(formData.TotalAmount);
+        break;
+    }
+
+    setFieldErrors(prev => ({
+      ...prev,
+      [field]: errorMsg
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Validate all fields before submission
+    const errors = {
+      PONumber: validatePONumber(formData.PONumber),
+      SupplierId: validateSupplierId(formData.SupplierId),
+      Status: validateStatus(formData.Status),
+      TotalAmount: validateTotalAmount(formData.TotalAmount),
+    };
+
+    setFieldErrors(errors);
+
+    // Check if there are any validation errors
+    const hasErrors = Object.values(errors).some(err => err !== '');
+    if (hasErrors) {
+      setError('Please fix all validation errors before submitting');
+      return;
+    }
+
     setSubmitting(true);
 
     console.log('Form data before sending:', formData);
@@ -95,14 +179,43 @@ export default function PurchaseOrdersForm({ poToEdit, onSuccess, onCancel }: Pu
         ModifiyBy: 0,
         ModifiyAt: null,
       });
+      setFieldErrors({
+        PONumber: '',
+        SupplierId: '',
+        Status: '',
+        TotalAmount: '',
+      });
 
       if (onSuccess) onSuccess();
     } catch (err: any) {
       console.error('Error submitting purchase order:', err);
       console.error('Error response:', err?.response?.data);
-      const errorMessage = err?.response?.data?.errors
-        ? Object.values(err.response.data.errors).flat().join(', ')
-        : err?.response?.data?.message || err.message || 'Operation failed';
+      
+      // Handle different types of errors with user-friendly messages
+      let errorMessage = '';
+      
+      if (err?.response?.status === 404) {
+        errorMessage = 'Supplier ID not found in the database. Please verify the Supplier ID and try again.';
+      } else if (err?.response?.status === 409) {
+        errorMessage = 'A purchase order with this PO Number already exists. Please use a unique PO Number.';
+      } else if (err?.response?.status === 500) {
+        errorMessage = 'Unable to save the purchase order. Please verify that the Supplier ID exists in the system.';
+      } else if (err?.response?.status === 400) {
+        // Bad request - validation error from server
+        if (err?.response?.data?.errors) {
+          const serverErrors = Object.values(err.response.data.errors).flat();
+          errorMessage = serverErrors.join(', ');
+        } else {
+          errorMessage = err?.response?.data?.message || 'Invalid data provided. Please check your entries.';
+        }
+      } else if (err?.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err?.message && !err.message.includes('status code')) {
+        errorMessage = err.message;
+      } else {
+        errorMessage = 'Unable to complete the operation. Please verify your data and try again.';
+      }
+      
       setError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -114,11 +227,19 @@ export default function PurchaseOrdersForm({ poToEdit, onSuccess, onCancel }: Pu
     setFormData({
       ...formData,
       [name]: name === 'POId' || name === 'SupplierId'
-        ? Number(value)
+        ? Number(value) || 0
         : name === 'TotalAmount'
         ? parseFloat(value) || 0
         : value,
     });
+
+    // Clear field error when user starts typing
+    if (fieldErrors[name as keyof typeof fieldErrors]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
   };
 
   const formatCurrency = (amount: number) => {
@@ -151,32 +272,29 @@ export default function PurchaseOrdersForm({ poToEdit, onSuccess, onCancel }: Pu
 
       <form onSubmit={handleSubmit}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-          <div>
-            <label htmlFor="POId" style={labelStyle}>
-              PO ID *
-            </label>
-            <input
-              type="number"
-              id="POId"
-              name="POId"
-              value={formData.POId}
-              onChange={handleChange}
-              required
-              disabled={!!poToEdit}
-              style={{
-                ...inputStyle,
-                backgroundColor: poToEdit ? '#e0e0e0' : 'white',
-              }}
-              placeholder="e.g., 1"
-            />
-            {poToEdit && (
-              <small style={{ color: '#666', fontSize: '12px' }}>
+          {poToEdit && (
+            <div>
+              <label htmlFor="POId" style={labelStyle}>
+                PO ID
+              </label>
+              <input
+                type="number"
+                id="POId"
+                name="POId"
+                value={formData.POId}
+                disabled
+                style={{
+                  ...inputStyle,
+                  backgroundColor: '#e0e0e0',
+                }}
+              />
+              <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
                 ID cannot be changed
               </small>
-            )}
-          </div>
+            </div>
+          )}
 
-          <div>
+          <div style={{ gridColumn: poToEdit ? 'auto' : 'span 2' }}>
             <label htmlFor="PONumber" style={labelStyle}>
               PO Number *
             </label>
@@ -186,10 +304,20 @@ export default function PurchaseOrdersForm({ poToEdit, onSuccess, onCancel }: Pu
               name="PONumber"
               value={formData.PONumber}
               onChange={handleChange}
+              onBlur={() => handleBlur('PONumber')}
               required
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.PONumber ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., PO-2024-001"
             />
+            {fieldErrors.PONumber && (
+              <small style={errorTextStyle}>{fieldErrors.PONumber}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Unique purchase order identifier
+            </small>
           </div>
 
           <div>
@@ -200,12 +328,23 @@ export default function PurchaseOrdersForm({ poToEdit, onSuccess, onCancel }: Pu
               type="number"
               id="SupplierId"
               name="SupplierId"
-              value={formData.SupplierId}
+              value={formData.SupplierId || ''}
               onChange={handleChange}
+              onBlur={() => handleBlur('SupplierId')}
               required
-              style={inputStyle}
+              min="1"
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.SupplierId ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., 1"
             />
+            {fieldErrors.SupplierId && (
+              <small style={errorTextStyle}>{fieldErrors.SupplierId}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Select the supplier
+            </small>
           </div>
 
           <div>
@@ -226,6 +365,9 @@ export default function PurchaseOrdersForm({ poToEdit, onSuccess, onCancel }: Pu
               required
               style={inputStyle}
             />
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Date and time of order
+            </small>
           </div>
 
           <div>
@@ -237,8 +379,12 @@ export default function PurchaseOrdersForm({ poToEdit, onSuccess, onCancel }: Pu
               name="Status"
               value={formData.Status}
               onChange={handleChange}
+              onBlur={() => handleBlur('Status')}
               required
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.Status ? '#c62828' : '#ccc'
+              }}
             >
               <option value="">Select Status</option>
               <option value="DRAFT">DRAFT</option>
@@ -250,6 +396,12 @@ export default function PurchaseOrdersForm({ poToEdit, onSuccess, onCancel }: Pu
               <option value="REJECTED">REJECTED</option>
               <option value="CANCELLED">CANCELLED</option>
             </select>
+            {fieldErrors.Status && (
+              <small style={errorTextStyle}>{fieldErrors.Status}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Current order status
+            </small>
           </div>
 
           <div>
@@ -260,14 +412,24 @@ export default function PurchaseOrdersForm({ poToEdit, onSuccess, onCancel }: Pu
               type="number"
               id="TotalAmount"
               name="TotalAmount"
-              value={formData.TotalAmount}
+              value={formData.TotalAmount || ''}
               onChange={handleChange}
+              onBlur={() => handleBlur('TotalAmount')}
               required
-              min="0"
+              min="0.01"
               step="0.01"
-              style={inputStyle}
+              style={{
+                ...inputStyle,
+                borderColor: fieldErrors.TotalAmount ? '#c62828' : '#ccc'
+              }}
               placeholder="e.g., 5000.00"
             />
+            {fieldErrors.TotalAmount && (
+              <small style={errorTextStyle}>{fieldErrors.TotalAmount}</small>
+            )}
+            <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+              Total order value
+            </small>
           </div>
         </div>
 
@@ -352,4 +514,12 @@ const inputStyle: React.CSSProperties = {
   fontSize: '16px',
   border: '1px solid #ccc',
   borderRadius: '4px',
+};
+
+const errorTextStyle: React.CSSProperties = {
+  color: '#c62828',
+  fontSize: '12px',
+  display: 'block',
+  marginTop: '4px',
+  fontWeight: '500'
 };

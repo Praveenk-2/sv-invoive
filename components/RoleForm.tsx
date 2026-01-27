@@ -27,18 +27,6 @@ export default function RoleForm({ roleToEdit, onSuccess, onCancel }: RoleFormPr
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  // Common role suggestions
-  const roleSuggestions = [
-    { name: 'Administrator', icon: '👑', description: 'Full system access and control' },
-    { name: 'Manager', icon: '👔', description: 'Manage teams and operations' },
-    { name: 'Supervisor', icon: '👨‍💼', description: 'Oversee daily operations' },
-    { name: 'Employee', icon: '👤', description: 'Standard user access' },
-    { name: 'Guest', icon: '🚶', description: 'Limited read-only access' },
-    { name: 'Developer', icon: '💻', description: 'Technical development access' },
-    { name: 'Support', icon: '🎧', description: 'Customer support access' },
-    { name: 'Sales', icon: '💼', description: 'Sales operations access' },
-  ];
-
   useEffect(() => {
     if (roleToEdit) {
       console.log('Editing role:', roleToEdit);
@@ -145,10 +133,10 @@ export default function RoleForm({ roleToEdit, onSuccess, onCancel }: RoleFormPr
       )}
 
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+        <div style={{ display: 'grid', gap: '15px'}}>
           <div>
             <label htmlFor="RoleId" style={labelStyle}>
-              Role ID *
+              Role ID
             </label>
             <input
               type="number"
@@ -186,68 +174,6 @@ export default function RoleForm({ roleToEdit, onSuccess, onCancel }: RoleFormPr
               placeholder="e.g., Administrator"
             />
           </div>
-        </div>
-
-        {!roleToEdit && (
-          <div style={{ marginTop: '20px' }}>
-            <label style={{ ...labelStyle, marginBottom: '10px' }}>
-              Quick Role Suggestions (Click to use)
-            </label>
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '10px',
-              marginTop: '10px'
-            }}>
-              {roleSuggestions.map((suggestion) => (
-                <div
-                  key={suggestion.name}
-                  onClick={() => handleRoleSuggestionClick(suggestion.name)}
-                  style={{
-                    padding: '12px',
-                    backgroundColor: formData.RoleName === suggestion.name ? '#1976d2' : 'white',
-                    color: formData.RoleName === suggestion.name ? 'white' : '#333',
-                    border: '2px solid',
-                    borderColor: formData.RoleName === suggestion.name ? '#1976d2' : '#e0e0e0',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (formData.RoleName !== suggestion.name) {
-                      e.currentTarget.style.borderColor = '#1976d2';
-                      e.currentTarget.style.backgroundColor = '#e3f2fd';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (formData.RoleName !== suggestion.name) {
-                      e.currentTarget.style.borderColor = '#e0e0e0';
-                      e.currentTarget.style.backgroundColor = 'white';
-                    }
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '20px' }}>{suggestion.icon}</span>
-                    <strong style={{ fontSize: '14px' }}>{suggestion.name}</strong>
-                  </div>
-                  <div style={{ fontSize: '11px', opacity: 0.8 }}>
-                    {suggestion.description}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div style={{ 
-          marginTop: '20px', 
-          padding: '15px', 
-          backgroundColor: '#e3f2fd', 
-          borderRadius: '4px',
-          fontSize: '13px'
-        }}>
-          <strong>🎭 Role Info:</strong> Roles define user responsibilities and can be linked 
-          to specific privileges for access control throughout the system.
         </div>
 
         <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>

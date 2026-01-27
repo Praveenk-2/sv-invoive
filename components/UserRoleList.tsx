@@ -5,7 +5,7 @@
 import React from 'react';
 import { useUserRoles } from '@/hooks/useUserRole';
 import { userRoleService } from '@/services/userRoleService';
-import { UserRole } from '@/types/userrole.types';
+import { UserRole } from '@/types/userRole.types';
 
 interface UserRoleListProps {
   onEdit?: (userRole: UserRole) => void;

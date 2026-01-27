@@ -94,7 +94,7 @@ export default function UnitForm({ unitToEdit, onSuccess, onCancel }: UnitFormPr
       padding: '20px', 
       backgroundColor: '#f5f5f5',
       borderRadius: '8px',
-      // maxWidth: '600px'
+      maxWidth: '600px'
     }}>
       <h2>{unitToEdit ? 'Edit Unit' : 'Create New Unit of Measurement'}</h2>
 
@@ -111,7 +111,7 @@ export default function UnitForm({ unitToEdit, onSuccess, onCancel }: UnitFormPr
       )}
 
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '15px' }}>
+        {/* <div style={{ marginBottom: '15px' }}>
           <label htmlFor="UnitId" style={labelStyle}>
             Unit ID *
           </label>
@@ -134,7 +134,7 @@ export default function UnitForm({ unitToEdit, onSuccess, onCancel }: UnitFormPr
               ID cannot be changed when editing
             </small>
           )}
-        </div>
+        </div> */}
 
         <div style={{ marginBottom: '15px' }}>
           <label htmlFor="UnitName" style={labelStyle}>
@@ -174,38 +174,6 @@ export default function UnitForm({ unitToEdit, onSuccess, onCancel }: UnitFormPr
             Short form (max 10 characters): kg, g, L, mL, pcs, etc.
           </small>
         </div>
-
-        {/* Preview */}
-        {(formData.UnitName || formData.Abbreviation) && (
-          <div style={{
-            padding: '15px',
-            backgroundColor: '#e3f2fd',
-            borderRadius: '4px',
-            marginBottom: '20px',
-            border: '1px solid #1976d2'
-          }}>
-            <strong style={{ color: '#1976d2' }}>Preview:</strong>
-            <div style={{ marginTop: '10px', fontSize: '16px' }}>
-              {formData.UnitName && (
-                <span>
-                  <strong>{formData.UnitName}</strong>
-                </span>
-              )}
-              {formData.UnitName && formData.Abbreviation && ' - '}
-              {formData.Abbreviation && (
-                <code style={{
-                  backgroundColor: 'white',
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  fontWeight: 'bold',
-                  color: '#1976d2'
-                }}>
-                  {formData.Abbreviation}
-                </code>
-              )}
-            </div>
-          </div>
-        )}
 
         <div style={{ display: 'flex', gap: '10px' }}>
           <button

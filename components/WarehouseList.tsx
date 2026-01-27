@@ -77,8 +77,8 @@ export default function WarehouseList({ onEdit }: WarehouseListProps) {
           No warehouses found. Create your first warehouse!
         </p>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ 
+        <div style={{ overflowX: 'auto' }} className='scroll-bar'>
+          <table style={{
             width: '100%', 
             borderCollapse: 'collapse', 
             marginTop: '20px',

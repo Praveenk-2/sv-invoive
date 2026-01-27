@@ -89,6 +89,7 @@ export default function UserList({ onEdit }: UserListProps) {
                 <th style={tableHeaderStyle}>User ID</th>
                 <th style={tableHeaderStyle}>Username</th>
                 <th style={tableHeaderStyle}>Email</th>
+                <th style={tableHeaderStyle}>Phone Number</th>
                 <th style={tableHeaderStyle}>Status</th>
                 {/* <th style={tableHeaderStyle}>Created At</th>
                 <th style={tableHeaderStyle}>Created By</th>
@@ -110,6 +111,18 @@ export default function UserList({ onEdit }: UserListProps) {
                       style={{ color: '#1976d2', textDecoration: 'none' }}
                     >
                       {user.Email}
+                    </a>
+                  </td>
+                  <td style={tableCellStyle}>
+                    <a 
+                      href={`tel:${user.PhoneNumber}`}
+                      style={{ 
+                        color: '#1976d2', 
+                        textDecoration: 'none',
+                        fontWeight: '500'
+                      }}
+                    >
+                      {user.PhoneNumber || '-'}
                     </a>
                   </td>
                   <td style={tableCellStyle}>

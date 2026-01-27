@@ -135,32 +135,6 @@ export default function WarehouseForm({ warehouseToEdit, onSuccess, onCancel }: 
       )}
 
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-          <div>
-            <label htmlFor="WarehouseId" style={labelStyle}>
-              Warehouse ID *
-            </label>
-            <input
-              type="number"
-              id="WarehouseId"
-              name="WarehouseId"
-              value={formData.WarehouseId}
-              onChange={handleChange}
-              required
-              disabled={!!warehouseToEdit}
-              style={{
-                ...inputStyle,
-                backgroundColor: warehouseToEdit ? '#e0e0e0' : 'white',
-              }}
-              placeholder="e.g., 1"
-            />
-            {warehouseToEdit && (
-              <small style={{ color: '#666', fontSize: '12px' }}>
-                ID cannot be changed
-              </small>
-            )}
-          </div>
-
           <div>
             <label htmlFor="WarehouseName" style={labelStyle}>
               Warehouse Name *
@@ -176,7 +150,6 @@ export default function WarehouseForm({ warehouseToEdit, onSuccess, onCancel }: 
               placeholder="e.g., Main Warehouse"
             />
           </div>
-        </div>
 
         <div style={{ marginTop: '15px' }}>
           <label htmlFor="Location" style={labelStyle}>
@@ -224,17 +197,6 @@ export default function WarehouseForm({ warehouseToEdit, onSuccess, onCancel }: 
           <small style={{ color: '#666', fontSize: '12px', marginLeft: '30px' }}>
             Active warehouses are available for stock operations
           </small>
-        </div>
-
-        <div style={{ 
-          marginTop: '20px', 
-          padding: '15px', 
-          backgroundColor: '#e3f2fd', 
-          borderRadius: '4px',
-          fontSize: '13px'
-        }}>
-          <strong>📦 Warehouse Info:</strong> This warehouse will be available for inventory 
-          management, stock transfers, and all warehouse operations.
         </div>
 
         <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
